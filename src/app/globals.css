@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-void: #070707;
+  --color-off-white: #F2EEE7;
+  --color-fc-accent: #B6FF00;
+  --color-music-accent: #E8302A;
+  --color-cloth-accent: #C8BFA8;
+  --font-display: var(--font-syne);
+  --font-serif: var(--font-instrument);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #070707;
+  color: #F2EEE7;
+  font-family: var(--font-syne), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Triptych panel hover expansion */
+.triptych {
+  display: flex;
+  height: 100dvh;
+  width: 100%;
+}
+
+.panel {
+  flex: 1;
+  transition: flex 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.triptych:has(.panel:nth-child(1):hover) .panel:nth-child(1) { flex: 1.9; }
+.triptych:has(.panel:nth-child(1):hover) .panel:nth-child(2) { flex: 0.55; }
+.triptych:has(.panel:nth-child(1):hover) .panel:nth-child(3) { flex: 0.55; }
+
+.triptych:has(.panel:nth-child(2):hover) .panel:nth-child(1) { flex: 0.55; }
+.triptych:has(.panel:nth-child(2):hover) .panel:nth-child(2) { flex: 1.9; }
+.triptych:has(.panel:nth-child(2):hover) .panel:nth-child(3) { flex: 0.55; }
+
+.triptych:has(.panel:nth-child(3):hover) .panel:nth-child(1) { flex: 0.55; }
+.triptych:has(.panel:nth-child(3):hover) .panel:nth-child(2) { flex: 0.55; }
+.triptych:has(.panel:nth-child(3):hover) .panel:nth-child(3) { flex: 1.9; }
+
+/* Panel background textures */
+.panel-fc {
+  background-color: #090E05;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 48px,
+    rgba(182, 255, 0, 0.025) 48px,
+    rgba(182, 255, 0, 0.025) 49px
+  );
+}
+
+.panel-music {
+  background-color: #0E0505;
+  background-image:
+    radial-gradient(ellipse at 50% 70%, rgba(232, 48, 42, 0.07) 0%, transparent 65%),
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0px,
+      transparent 28px,
+      rgba(232, 48, 42, 0.025) 28px,
+      rgba(232, 48, 42, 0.025) 29px
+    );
+}
+
+.panel-cloth {
+  background-color: #0B0B09;
+  background-image:
+    linear-gradient(rgba(200, 191, 168, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 191, 168, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
