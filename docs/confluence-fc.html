@@ -1375,7 +1375,7 @@ body.cfc-edit [data-cfc-key]:hover::before { opacity: 1; }
     <div class="ed-output" id="ed-output"></div>
     <p class="ed-hint">Drag to move. Red corner handle to resize. Auto-saved.</p>
   </div>
-  <button class="ed-toggle" id="ed-toggle">&#9998; Edit Assets</button>
+  <button class="ed-toggle" id="ed-toggle" style="display:none">&#9998; Edit Assets</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1388,7 +1388,8 @@ body.cfc-edit [data-cfc-key]:hover::before { opacity: 1; }
   /* ── SUPABASE ───────────────────────────────────────────── */
   var SB = window.supabase.createClient(
     'https://vfsotxguyjlcsxlceerd.supabase.co',
-    'sb_publishable_5WS97ilRB7SMCoKxnATOeQ_7C22IBJH'
+    'sb_publishable_5WS97ilRB7SMCoKxnATOeQ_7C22IBJH',
+    { auth: { persistSession: false } }
   );
 
   /* ── CLUB CONSTANTS ─────────────────────────────────────── */
@@ -1667,10 +1668,12 @@ body.cfc-edit [data-cfc-key]:hover::before { opacity: 1; }
     SB.auth.onAuthStateChange(function(ev,session){
       if(session){
         $('adm-bar').classList.add('show');
+        $('ed-toggle').style.display='';
         $('admin-login-link').style.display='none';
         if(ev==='SIGNED_IN') status('Logged in as '+session.user.email,true);
       } else {
         $('adm-bar').classList.remove('show');
+        $('ed-toggle').style.display='none';
         $('admin-login-link').style.display='';
         closePanel();
       }
