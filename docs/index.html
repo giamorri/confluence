@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confluence FC — West Auckland</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Cormorant:ital,wght@0,400;0,600;1,400;1,600&family=Barlow+Condensed:wght@400;600;700&family=Playfair+Display:ital,wght@1,700;1,900&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET + CURSOR HIDDEN ─────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+  cursor: none !important;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: #EDE4CF; color: #111;
+  font-family: 'Barlow Condensed', sans-serif;
+  overflow-x: hidden; position: relative;
+}
+
+/* ─── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --red:    #6B1111;
+  --red-b:  #9C0F1C;
+  --gold:   #C8920A;
+  --amber:  #E8A800;
+  --ink:    #111111;
+  --mute:   #888888;
+  --bg:     #EDE4CF;   /* warm parchment — site-wide base */
+}
+
+/* ─── CUSTOM CURSOR ──────────────────────────────────────── */
+.cur-ring {
+  position: fixed; left: 0; top: 0; z-index: 99999;
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1.5px solid var(--red-b);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: width .18s ease, height .18s ease, border-color .18s;
+  will-change: left, top;
+}
+.cur-dot {
+  position: fixed; left: 0; top: 0; z-index: 99999;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--red-b);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: width .1s, height .1s;
+  will-change: left, top;
+}
+.cur-ring.big  { width: 54px; height: 54px; }
+.cur-dot.small { width: 4px; height: 4px; }
+
+/* ─── PAGE-WIDE ACCENT OVERLAY ───────────────────────────── */
+/* Spans hero + collective screens. mix-blend-mode:multiply
+   makes every white pixel invisible — only colored art shows. */
+.page-accents {
+  position: absolute; top: -277px; left: -79px;
+  width: 1598px; height: 1851px;
+  mix-blend-mode: multiply;
+  pointer-events: none; z-index: 10;
+  display: block;
+}
+
+/* ─── NAV ────────────────────────────────────────────────── */
+.nav {
+  position: sticky; top: 0; z-index: 900;
+  height: 48px; background: rgba(237,228,207,.96);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  display: flex; align-items: center; gap: 1.4rem; padding: 0 2.2rem;
+}
+.nav-back {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: 1rem;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--red-b); text-decoration: none; transition: opacity .2s;
+}
+.nav-back:hover { opacity: .55; }
+.nav-logo { width: 30px; height: 30px; }
+.nav-logo img { width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }
+.nav-links { display: flex; gap: 1.8rem; margin-left: auto; }
+.nav-links a {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: 1rem;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: #111; text-decoration: none; transition: color .2s;
+}
+.nav-links a:hover { color: var(--red-b); }
+.nav-live {
+  display: none; align-items: center; gap: .35rem;
+  background: var(--red-b); color: #fff;
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .65rem;
+  letter-spacing: .15em; text-transform: uppercase;
+  padding: .2rem .6rem; border-radius: 100px;
+}
+.nav-live.on { display: flex; }
+.nav-live::before { content:''; width:5px; height:5px; border-radius:50%; background:#fff; animation:blink 1s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+/* ─── HERO ───────────────────────────────────────────────── */
+.hero {
+  height: calc(100dvh - 48px); position: relative;
+  background: var(--bg); overflow: hidden;
+}
+/* The text hero PNG — uses the font/treatment from the user's design file.
+   White background invisible on white page via multiply. */
+.hero-type {
+  position: absolute;
+  top: -71.7578px; left: 348.359px;
+  width: 846.719px; height: 1428.84px;
+  mix-blend-mode: multiply; pointer-events: none; z-index: 12;
+  opacity: 0; animation: fade-in .9s ease .2s forwards;
+}
+/* FC badge — standalone absolute, independently draggable */
+.hero-badge {
+  position: absolute; top: 62px; left: 321px;
+  width: 140px; height: 179.977px;
+  display: block; z-index: 20;
+}
+.hero-badge img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  mix-blend-mode: multiply; /* white bg disappears on white hero */
+}
+/* Hero CTAs — draggable via asset editor */
+.hero-ctas {
+  position: absolute; top: 229.28px; left: 826.48px;
+  width: 198.672px;
+  z-index: 20; display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;
+  opacity: 0; animation: fade-in .7s ease .7s forwards;
+}
+
+@keyframes fade-in { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* CTA buttons */
+.btn-red {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .65rem;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: #fff; text-decoration: none; background: var(--red);
+  padding: .65rem 1.5rem; box-shadow: 3px 3px 0 #111;
+  transition: transform .14s, box-shadow .14s;
+}
+.btn-red:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 #111; }
+.btn-outline {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .65rem;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--red); text-decoration: none;
+  border-bottom: 2px solid var(--red); padding-bottom: 2px;
+  transition: color .2s, border-color .2s;
+}
+.btn-outline:hover { color: #111; border-color: #111; }
+
+/* ─── HERO VISION STRIP ─────────────────────────────────── */
+.hero-vision {
+  position: absolute; bottom: 9.5rem; left: 5rem;
+  z-index: 22; max-width: 480px;
+  opacity: 0; animation: fade-in .8s ease 1.1s forwards;
+}
+.hero-vision-tag {
+  font-family: 'Cormorant'; font-style: italic; font-weight: 400;
+  font-size: clamp(1.1rem, 1.45vw, 1.35rem); line-height: 1.52;
+  color: rgba(17,17,17,.58); margin-bottom: 1.1rem;
+}
+.hero-vision-pills {
+  display: flex; flex-direction: column; gap: .48rem;
+}
+.hero-vision-pills span {
+  display: flex; align-items: center; gap: .65rem;
+  font-family: 'Barlow Condensed'; font-weight: 700;
+  font-size: 1.08rem; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--ink);
+}
+.hero-vision-pills span::before {
+  content: ''; width: 20px; height: 2px;
+  background: var(--red-b); flex-shrink: 0;
+}
+
+/* ─── HERO PITCH GHOST ──────────────────────────────────── */
+.hero-pitch-ghost {
+  position: absolute; top: 50%; left: 58%;
+  transform: translate(-50%,-50%) rotate(-4deg);
+  width: 260px; height: 390px;
+  pointer-events: none; z-index: 5; opacity: .038;
+}
+
+/* ─── HERO VIGNETTE ─────────────────────────────────────── */
+.hero-vignette {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 220px;
+  background: linear-gradient(to bottom, transparent, rgba(107,17,17,.13));
+  pointer-events: none; z-index: 8;
+}
+
+/* ─── HERO MATCH BADGE ──────────────────────────────────── */
+.hero-match-badge {
+  position: absolute; top: 1.3rem; right: 1.8rem; z-index: 22;
+  display: flex; align-items: center; gap: .48rem;
+  opacity: 0; animation: fade-in .7s ease .5s forwards;
+}
+.hmb-next {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .68rem;
+  letter-spacing: .2em; text-transform: uppercase;
+  background: var(--red-b); color: #fff; padding: .22rem .52rem;
+}
+.hmb-opp, .hmb-time {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .92rem;
+  letter-spacing: .1em; text-transform: uppercase; color: rgba(17,17,17,.55);
+}
+.hmb-sep { color: rgba(17,17,17,.2); font-size: .88rem; }
+
+/* ─── HERO STAT STRIP ───────────────────────────────────── */
+.hero-stat-strip {
+  position: absolute; bottom: 2.8rem; left: 0; right: 0; z-index: 22;
+  display: flex; align-items: center; justify-content: center;
+  padding: .55rem 2rem; border-top: 1px solid rgba(17,17,17,.07);
+  background: rgba(237,228,207,.6); backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0; animation: fade-in .6s ease .95s forwards;
+}
+.hero-stat-strip span {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .88rem;
+  letter-spacing: .2em; text-transform: uppercase; color: rgba(17,17,17,.35);
+  padding: 0 1.4rem;
+}
+.hero-stat-strip span + span { border-left: 1px solid rgba(17,17,17,.1); }
+
+/* ─── HERO SCROLL CUE ───────────────────────────────────── */
+.hero-scroll-cue {
+  position: absolute; bottom: 6rem; left: 50%; transform: translateX(-50%); z-index: 22;
+  display: flex; flex-direction: column; align-items: center; gap: .28rem;
+  opacity: 0; animation: fade-in .6s ease 1.5s forwards;
+}
+.hero-scroll-cue-label {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .85rem;
+  letter-spacing: .28em; text-transform: uppercase; color: var(--red-b);
+}
+.hero-scroll-arrow {
+  font-size: 1.1rem; color: var(--red-b); line-height: 1;
+  animation: scroll-pulse 2.2s ease-in-out infinite;
+}
+@keyframes scroll-pulse {
+  0%,100%{transform:translateY(0);opacity:.45} 55%{transform:translateY(5px);opacity:1}
+}
+
+
+/* ─── COLLECTIVE / ABOUT ─────────────────────────────────── */
+.collective {
+  min-height: 100dvh; background: var(--bg);
+  display: grid; grid-template-columns: 52% 48%;
+  position: relative; overflow: hidden;
+}
+.collective-left {
+  padding: 4rem 2.5rem 4rem 5rem;
+  display: flex; flex-direction: column; justify-content: space-between;
+  position: relative; z-index: 15;
+}
+.collective-heading {
+  font-family: 'DM Sans', sans-serif; font-weight: 800; font-optical-sizing: auto;
+  font-size: clamp(2.4rem, 4.5vw, 6rem); line-height: .92;
+  color: var(--ink); letter-spacing: -.02em; text-transform: uppercase;
+  margin-bottom: 0;
+}
+.collective-body { display:flex; flex-direction:column; gap:1.1rem; max-width:400px; }
+.collective-body p {
+  font-family: 'Cormorant'; font-style: italic; font-weight: 400;
+  font-size: clamp(1.05rem,1.3vw,1.3rem); line-height: 1.65; color: var(--red);
+}
+
+/* ─── MISSION/VISION TILES ───────────────────────────────── */
+.mv-tiles {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: rgba(17,17,17,.09);
+  margin-top: 0;
+  border: 1px solid rgba(17,17,17,.09);
+}
+.mv-tile {
+  background: var(--bg); padding: 2rem 1.8rem;
+  display: flex; flex-direction: column; gap: .6rem;
+}
+.mv-tile-num {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .82rem;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--red-b);
+}
+.mv-tile-label {
+  font-family: 'DM Sans'; font-weight: 800; font-size: 1.15rem;
+  letter-spacing: .03em; text-transform: uppercase; color: var(--ink); line-height: 1;
+}
+.mv-tile-body {
+  font-family: 'Cormorant'; font-style: italic; font-weight: 400;
+  font-size: clamp(1.1rem,1.35vw,1.3rem); line-height: 1.55;
+  color: rgba(17,17,17,.68); margin-top: .2rem;
+}
+
+/* 4-pointed SVG starburst */
+.collective-star {
+  position: absolute; top: 194.453px; left: 527px;
+  width: 211.68px; height: 211.68px;
+  transform: scale(.5) rotate(-15deg);
+  z-index: 16; pointer-events: none;
+  opacity: 0;
+  transition: opacity .8s ease, transform .8s cubic-bezier(0.16,1,0.3,1);
+}
+.collective-star.visible {
+  opacity: 1; transform: scale(1) rotate(0deg);
+}
+
+/* Amaan photo — right column */
+.collective-right {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: flex-end;
+}
+.collective-player {
+  position: absolute; top: -283px; left: -640px;
+  width: 1341px; height: 1384px;
+  object-fit: contain; object-position: center center;
+  mix-blend-mode: multiply; display: block;
+}
+
+/* ─── FIXTURE / RESULTS ──────────────────────────────────── */
+.double-scroll {
+  min-height: 100dvh; position: relative; background: var(--bg);
+  overflow: hidden; display: flex; align-items: center;
+}
+.ds-inner {
+  display: grid; grid-template-columns: 1fr 1px 1fr;
+  width: 100%; align-items: start; padding: 4rem 0;
+}
+.ds-divider { background: rgba(17,17,17,.1); align-self: stretch; min-height: 300px; }
+.ds-col { padding: 1.5rem 6vw; }
+.ds-col-right { padding: 1.5rem 6vw 1.5rem 5vw; }
+.ds-label {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: 1.15rem;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--red-b);
+  margin-bottom: .9rem; display: flex; align-items: center; gap: .7rem;
+}
+.ds-label::before { content:''; width:28px; height:2px; background:var(--red-b); flex-shrink:0; }
+.ds-heading {
+  font-family: 'DM Sans', sans-serif; font-weight: 800; font-optical-sizing: auto;
+  font-size: clamp(2.2rem,5vw,7rem); line-height: .93;
+  color: var(--ink); margin-bottom: 1.3rem; letter-spacing: -.01em;
+}
+.ds-heading span { color: var(--red-b); }
+.ds-meta {
+  font-family: 'Barlow Condensed'; font-size: clamp(.92rem,1.1vw,1.1rem);
+  color: var(--ink); line-height: 1.5; margin-bottom: 2rem; opacity: .65;
+}
+/* Countdown */
+.countdown { display:flex; gap:2rem; flex-wrap:wrap; }
+.cd-unit { display:flex; flex-direction:column; align-items:center; gap:.15rem; }
+.cd-num {
+  font-family: 'DM Sans', sans-serif; font-weight: 900; font-optical-sizing: auto;
+  font-size: clamp(2rem,4.5vw,5rem);
+  color: var(--red-b); line-height: 1;
+  min-width: 2ch; text-align: center;
+}
+.cd-lbl {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: 1.08rem;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--mute);
+}
+/* Results */
+.result-row {
+  display: flex; align-items: center; gap: .9rem;
+  padding: .82rem 0; border-bottom: 1px solid rgba(17,17,17,.1);
+}
+.result-row:first-child { border-top: 1px solid rgba(17,17,17,.1); }
+.r-date { font-family:'Barlow Condensed'; font-weight:600; font-size:1.12rem; letter-spacing:.05em; color:var(--mute); min-width:3.2rem; }
+.r-ha {
+  width:24px; height:24px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Barlow Condensed'; font-weight:700; font-size:.8rem;
+  color:#fff; background:var(--red-b);
+}
+.r-opp { font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(.85rem,1.3vw,1.1rem); color:var(--ink); flex:1; }
+.r-score { font-family:'DM Sans', sans-serif; font-weight:800; font-optical-sizing:auto; font-size:clamp(1rem,1.8vw,1.5rem); padding:.1rem .5rem; }
+.r-score.w { background:var(--red-b); color:#fff; }
+.r-score.d { background:var(--amber); color:#111; }
+.r-score.l { color:var(--mute); border:1px solid rgba(17,17,17,.15); }
+
+/* Gaffer's Review block */
+.gaffer-block { margin-top: 3rem; padding-top: 2.2rem; border-top: 1px solid rgba(17,17,17,.1); }
+.gaffer-eyebrow {
+  display: flex; align-items: center; gap: .6rem;
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: 1.1rem;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--amber);
+  margin-bottom: .9rem;
+}
+.gaffer-line { width: 22px; height: 2px; background: var(--amber); flex-shrink: 0; }
+.gaffer-match {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: 1.22rem;
+  letter-spacing: .04em; color: var(--ink); margin-bottom: .8rem;
+  text-transform: uppercase;
+}
+.gaffer-quote {
+  font-family: 'Cormorant'; font-style: italic; font-weight: 400;
+  font-size: clamp(1.15rem, 1.4vw, 1.32rem); line-height: 1.75;
+  color: #555; margin: 0; border-left: 3px solid var(--red-b);
+  padding-left: 1rem;
+}
+
+/* ─── SQUAD ──────────────────────────────────────────────── */
+.squad {
+  background: var(--bg); padding: 3rem 5rem 4rem;
+  position: relative; overflow: hidden;
+}
+/* Faint stars ghost behind the pitch */
+.squad-bg-stars {
+  position: absolute; top: 42.211px; left: 29.36px;
+  width: 362.875px; height: 204.109px;
+  mix-blend-mode: multiply; pointer-events: none; opacity: .12;
+}
+.section-eyebrow {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: 1.05rem;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--red-b); margin-bottom: .55rem;
+}
+.section-heading {
+  font-family: 'DM Sans', sans-serif; font-weight: 800; font-optical-sizing: auto;
+  font-size: clamp(2rem,4.5vw,5.5rem);
+  line-height: .93; color: var(--ink); margin-bottom: 2.2rem; letter-spacing: -.01em;
+}
+.section-heading em { font-style: normal; color: var(--red-b); }
+
+/* Squad three-column: list | text | pitch */
+.squad-grid {
+  display: grid; grid-template-columns: 400px 1fr 230px; gap: 3rem; align-items: start;
+  margin-top: 2rem;
+}
+/* Squad list (left column — rendered as 2 sub-columns by JS) */
+.sq-col-header {
+  font-family:'Barlow Condensed'; font-weight:700; font-size:1rem;
+  letter-spacing:.26em; text-transform:uppercase; color:var(--amber); margin-bottom:.6rem;
+}
+.sq-two-col { display:flex; gap:.5rem; }
+.sq-sub { flex:1; min-width:0; }
+.sq-player {
+  display:grid; grid-template-columns:18px 1fr auto; align-items:baseline; gap:.35rem;
+  padding:.3rem 0; border-bottom:1px solid rgba(17,17,17,.07); font-family:'Barlow Condensed';
+}
+.sq-player .sq-name { color:var(--ink); font-weight:700; }
+.sq-num { font-size:.9rem; color:var(--mute); font-weight:600; text-align:right; }
+.sq-name { font-size:.98rem; text-transform:uppercase; letter-spacing:.02em; }
+.sq-pos { font-size:.82rem; letter-spacing:.06em; text-transform:uppercase; }
+.sq-player .sq-pos { color:var(--mute); }
+.sq-divider { height:1px; background:rgba(17,17,17,.15); margin:.9rem 0 .5rem; }
+.sq-bench-hd { margin-top:.3rem; }
+.squad-story-eyebrow {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: 1rem;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--gold);
+  display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem;
+}
+.squad-story-eyebrow::before { content:''; width:22px; height:2px; background:var(--gold); }
+.squad-story-heading {
+  font-family: 'DM Sans', sans-serif; font-weight: 800; font-optical-sizing: auto;
+  text-transform: uppercase;
+  font-size: clamp(1.8rem, 3.2vw, 3.5rem); line-height: .95;
+  color: var(--ink); letter-spacing: -.01em; margin-bottom: 1.8rem;
+}
+.squad-story-heading em { font-style: normal; color: var(--red-b); }
+.squad-story-body {
+  display: flex; flex-direction: column; gap: .75rem;
+}
+.squad-story-body p {
+  font-family: 'Cormorant'; font-style: italic; font-weight: 400;
+  font-size: clamp(1.05rem, 1.25vw, 1.18rem); line-height: 1.65; color: #555;
+}
+.squad-story-body strong { font-style: normal; color: var(--red-b); font-weight: 600; }
+
+/* Formation pitch */
+.formation-wrap { width:100%; margin: 0 auto 2rem; position: relative; z-index: 2; }
+.pitch {
+  position: relative; width: 100%; aspect-ratio: 2/3;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0,0,0,.04) 0px, rgba(0,0,0,.04) 28px, transparent 28px, transparent 56px),
+    linear-gradient(155deg, #296929 0%, #2f6e2f 45%, #2a6d2a 100%);
+  box-shadow: 5px 5px 0 var(--red-b);
+}
+.pitch-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.player-node {
+  position: absolute; left: var(--px); top: var(--py);
+  transform: translate(-50%,-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  z-index: 2; opacity: 0;
+}
+@keyframes player-pop {
+  0%  { opacity:0; transform:translate(-50%,-50%) scale(.25); }
+  65% { transform:translate(-50%,-50%) scale(1.12); }
+  100%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+}
+.formation-wrap.visible .player-node { animation: player-pop .45s cubic-bezier(0.16,1,0.3,1) forwards; }
+.formation-wrap.visible .pitch .player-node:nth-child(2)  { animation-delay:.04s; }
+.formation-wrap.visible .pitch .player-node:nth-child(3)  { animation-delay:.11s; }
+.formation-wrap.visible .pitch .player-node:nth-child(4)  { animation-delay:.18s; }
+.formation-wrap.visible .pitch .player-node:nth-child(5)  { animation-delay:.25s; }
+.formation-wrap.visible .pitch .player-node:nth-child(6)  { animation-delay:.32s; }
+.formation-wrap.visible .pitch .player-node:nth-child(7)  { animation-delay:.39s; }
+.formation-wrap.visible .pitch .player-node:nth-child(8)  { animation-delay:.46s; }
+.formation-wrap.visible .pitch .player-node:nth-child(9)  { animation-delay:.53s; }
+.formation-wrap.visible .pitch .player-node:nth-child(10) { animation-delay:.60s; }
+.formation-wrap.visible .pitch .player-node:nth-child(11) { animation-delay:.67s; }
+.formation-wrap.visible .pitch .player-node:nth-child(12) { animation-delay:.74s; }
+.p-circle {
+  width: clamp(30px,6.5vw,44px); height: clamp(30px,6.5vw,44px); border-radius: 50%;
+  background: var(--red-b); border: 2px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: clamp(.6rem,1.3vw,.88rem); color: #fff;
+  box-shadow: 0 3px 8px rgba(0,0,0,.3), 2px 2px 0 rgba(200,18,32,.35);
+  transition: transform .2s cubic-bezier(0.16,1,0.3,1);
+}
+.p-circle.gk { background: var(--ink); }
+.player-node:hover .p-circle { transform: scale(1.25); }
+.p-name {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: clamp(.42rem,.85vw,.6rem);
+  color: #fff; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap;
+  text-shadow: 0 1px 5px rgba(0,0,0,.9);
+}
+.p-pos {
+  font-family: 'Barlow Condensed'; font-weight: 600; font-size: clamp(.32rem,.65vw,.45rem);
+  color: #FFD85A; text-transform: uppercase; letter-spacing: .1em; text-shadow: 0 1px 4px rgba(0,0,0,.9);
+}
+.bench-label {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: 1rem;
+  letter-spacing: .24em; text-transform: uppercase; color: var(--amber);
+  border-left: 3px solid var(--amber); padding-left: .7rem; margin: 1.8rem 0 .7rem;
+}
+.bench-list { display:flex; flex-wrap:wrap; gap:.4rem; }
+.bench-item { font-family:'Barlow Condensed'; font-size:.92rem; color:#111; padding:.26rem .7rem; border:1px solid rgba(17,17,17,.15); }
+.bench-num { color:var(--mute); margin-right:.3rem; }
+
+/* ─── CONTACT ────────────────────────────────────────────── */
+.contact {
+  background: var(--bg); padding: 5rem 5rem 6rem;
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+}
+.contact-excl {
+  position: absolute; top: 53.703px; left: 242.57px;
+  width: 120.945px; height: 68.0234px;
+  mix-blend-mode: multiply; pointer-events: none; opacity: .42;
+}
+.contact-heading {
+  font-family: 'DM Sans', sans-serif; font-weight: 800; font-optical-sizing: auto;
+  font-size: clamp(2.5rem,6vw,8rem);
+  line-height: .93; color: var(--red-b); margin-bottom: 2.8rem; letter-spacing: -.02em;
+}
+.contact-link {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 0; border-bottom: 1px solid rgba(17,17,17,.1);
+  text-decoration: none; gap: 1rem; transition: padding-left .2s;
+}
+.contact-link:first-of-type { border-top: 1px solid rgba(17,17,17,.1); }
+.contact-link:hover { padding-left: .5rem; }
+.contact-link:hover .cl-label { color: var(--red-b); }
+.cl-label {
+  font-family: 'DM Sans', sans-serif; font-weight: 800; font-optical-sizing: auto;
+  font-size: clamp(1.2rem,2.8vw,2.5rem);
+  color: var(--ink); letter-spacing: -.01em; transition: color .2s;
+}
+.cl-sub { font-family:'Barlow Condensed'; font-size:1.1rem; letter-spacing:.06em; color:var(--mute); margin-left:.5rem; }
+.cl-arrow { font-family:'DM Sans', sans-serif; font-weight:700; font-size:1.5rem; color:var(--red-b); transition:transform .2s; }
+.contact-link:hover .cl-arrow { transform: translate(4px,-4px); }
+
+/* ─── RESULT ROW INLINE EDITING ─────────────────────────── */
+body.cfc-edit .result-row { cursor: pointer; transition: background .15s; }
+body.cfc-edit .result-row:hover { background: rgba(107,17,17,.05); border-radius: 3px; }
+.res-inline-form { display:flex; align-items:center; gap:.45rem; width:100%; flex-wrap:nowrap; padding:.2rem 0; }
+.res-inline-form .adm-input { font-size:.78rem !important; padding:.28rem .5rem !important; height:auto !important; }
+.res-inline-form .adm-select { font-size:.78rem !important; padding:.28rem .4rem !important; height:auto !important; }
+.res-inline-save { padding:.3rem .7rem; font-family:'Barlow Condensed'; font-size:.68rem; font-weight:700; letter-spacing:.1em; background:var(--red-b); color:#fff; border:none; cursor:pointer; }
+.res-inline-cancel { background:none; border:1px solid rgba(17,17,17,.15); font-family:'Barlow Condensed'; font-size:.7rem; color:var(--mute); cursor:pointer; padding:.28rem .5rem; line-height:1; }
+.res-dash { font-family:'Barlow Condensed'; font-weight:700; font-size:.9rem; color:var(--mute); flex-shrink:0; }
+.res-wdl { display:flex; gap:.25rem; flex-shrink:0; }
+.res-wdl button { font-family:'Barlow Condensed'; font-weight:700; font-size:.68rem; letter-spacing:.08em; padding:.28rem .55rem; border:1.5px solid rgba(17,17,17,.15); background:none; cursor:pointer; color:var(--mute); transition:all .14s; }
+.res-wdl button.active-w { background:var(--red-b); color:#fff; border-color:var(--red-b); }
+.res-wdl button.active-d { background:var(--amber); color:#111; border-color:var(--amber); }
+.res-wdl button.active-l { background:#555; color:#fff; border-color:#555; }
+
+/* ─── SECTION DIVIDERS ───────────────────────────────────── */
+.double-scroll { border-top: 2px solid var(--red); }
+.squad         { border-top: 2px solid var(--red); }
+.contact       { border-top: 2px solid var(--red); }
+.footer        { border-top: 2px solid var(--red); }
+
+/* ─── FOOTER ─────────────────────────────────────────────── */
+.footer { background: #111; color: rgba(255,255,255,.55); padding: 4.5rem 5rem 3rem; position: relative; overflow: hidden; }
+.footer-top { display:flex; align-items:flex-start; justify-content:space-between; gap:2rem; flex-wrap:wrap; margin-bottom:3.5rem; }
+.footer-badge { width:44px; height:44px; background:#fff; padding:3px; margin-bottom:1rem; }
+.footer-badge img { width:100%; height:100%; object-fit:contain; display:block; }
+.footer-name { font-family:'DM Sans', sans-serif; font-weight:800; font-optical-sizing:auto; font-size:clamp(1.3rem,2.5vw,2.4rem); color:#fff; letter-spacing:-.01em; margin-bottom:.25rem; }
+.footer-league { font-family:'Barlow Condensed'; font-size:.54rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.22); }
+.footer-nav { display:flex; flex-direction:column; gap:.65rem; }
+.footer-nav a { font-family:'Barlow Condensed'; font-weight:700; font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.32); text-decoration:none; transition:color .2s; }
+.footer-nav a:hover { color:var(--red-b); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,.08); padding-top: 1.4rem;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .7rem;
+}
+.footer-copy { font-family:'Barlow Condensed'; font-size:.5rem; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.18); }
+.footer-bg {
+  position:absolute; bottom:-2rem; right:-1rem;
+  font-family:'DM Sans', sans-serif; font-weight:900; font-optical-sizing:auto;
+  font-size:clamp(5rem,14vw,17rem); letter-spacing:-.03em;
+  color:transparent; -webkit-text-stroke:1px rgba(156,15,28,.13);
+  pointer-events:none; user-select:none;
+}
+
+/* ─── SCROLL REVEAL ──────────────────────────────────────── */
+.reveal {
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .6s ease, transform .65s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ─── ASSET EDITOR ──────────────────────────────────────── */
+/* Toggle panel fixed bottom-right */
+.ed-panel {
+  position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 99990;
+  display: flex; flex-direction: column; align-items: flex-start; gap: .6rem;
+  font-family: 'Barlow Condensed'; pointer-events: auto;
+}
+.ed-toggle {
+  background: #111; color: #fff; border: none; padding: .5rem 1.1rem;
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .62rem;
+  letter-spacing: .16em; text-transform: uppercase;
+  box-shadow: 3px 3px 0 var(--red-b); transition: background .15s;
+}
+.ed-toggle.on { background: var(--red-b); box-shadow: 3px 3px 0 #111; }
+.ed-tools {
+  display: none; background: #fff; border: 2px solid #111;
+  padding: .9rem; width: 260px;
+  box-shadow: 4px 4px 0 #111;
+}
+.ed-tools.show { display: block; }
+.ed-tools-title {
+  font-weight: 700; font-size: .58rem; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--red-b); margin-bottom: .7rem; border-bottom: 1px solid rgba(17,17,17,.15); padding-bottom: .5rem;
+}
+.ed-asset-list { display: flex; flex-direction: column; gap: .35rem; margin-bottom: .8rem; }
+.ed-asset-item {
+  font-size: .68rem; color: #555; display: flex; align-items: center; gap: .5rem;
+}
+.ed-asset-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--red-b); flex-shrink: 0;
+}
+.ed-asset-item.active { color: #111; font-weight: 600; }
+.ed-copy {
+  background: var(--red-b); color: #fff; border: none; padding: .45rem 1rem;
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .58rem;
+  letter-spacing: .14em; text-transform: uppercase; width: 100%; margin-bottom: .5rem;
+}
+.ed-output {
+  background: #f5f5f5; padding: .6rem; font-size: .52rem; color: #444;
+  font-family: monospace; line-height: 1.6; word-break: break-all;
+  display: none; max-height: 180px; overflow-y: auto;
+  border: 1px solid rgba(17,17,17,.12);
+}
+.ed-output.show { display: block; }
+.ed-hint {
+  font-size: .52rem; color: var(--mute); letter-spacing: .06em;
+  line-height: 1.5; margin-top: .4rem;
+}
+
+/* Edit mode: assets get a dashed highlight and become grabbable.
+   pointer-events: auto is the key — overrides the none on all decorative els. */
+body.edit-mode [data-editable] {
+  outline: 2px dashed var(--red-b) !important;
+  outline-offset: 5px !important;
+  user-select: none !important;
+  pointer-events: auto !important;
+}
+body.edit-mode [data-editable]:hover {
+  outline-color: var(--amber) !important;
+}
+body.edit-mode [data-editable].dragging {
+  outline-color: #111 !important;
+  opacity: .8 !important;
+}
+/* Label tag above each asset while in edit mode */
+body.edit-mode [data-editable]::after {
+  content: attr(data-label);
+  position: absolute; top: -24px; left: 0;
+  background: var(--red-b); color: #fff;
+  font-family: 'Barlow Condensed'; font-weight: 700;
+  font-size: .5rem; letter-spacing: .12em; text-transform: uppercase;
+  padding: 2px 7px; pointer-events: none; white-space: nowrap; z-index: 99998;
+}
+/* Cursor ring turns amber in edit mode as visual feedback */
+body.edit-mode .cur-ring { border-color: var(--amber) !important; }
+
+/* Resize handle — floats at bottom-right corner of the hovered editable */
+#ed-rh {
+  position: fixed; display: none; z-index: 999999;
+  width: 18px; height: 18px;
+  background: var(--red-b); border: 2px solid #fff;
+  cursor: nwse-resize;
+}
+#ed-rh.resizing { background: var(--amber); }
+
+/* ─── SPEED STREAKS ──────────────────────────────────────── */
+/* Scroll-triggered racing stripes. Come out from page edges as
+   the section enters view. pointer-events: none always. */
+.streak-group {
+  position: absolute; inset: 0; overflow: hidden;
+  pointer-events: none; z-index: 3;
+}
+.s-bar {
+  position: absolute; border-radius: 2px;
+  will-change: transform;
+  transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Left-side bars: start collapsed at left edge, slide right */
+.sk-left .s-bar {
+  left: 0; transform: scaleX(0); transform-origin: left center;
+  background: linear-gradient(90deg, var(--sk-c, var(--red-b)) 0%, transparent 100%);
+}
+/* Right-side bars: start collapsed at right edge, slide left */
+.sk-right .s-bar {
+  right: 0; transform: scaleX(0); transform-origin: right center;
+  background: linear-gradient(270deg, var(--sk-c, var(--gold)) 0%, transparent 100%);
+}
+.streak-group.active .s-bar { transform: scaleX(1); }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────── */
+/* ─── SHORT SCREENS (laptops, 13-14") ─────────────────────── */
+@media (max-height: 780px) {
+  .hero-vision { bottom: 7.5rem; }
+  .hero-vision-tag { font-size: 1rem; margin-bottom: .7rem; }
+  .hero-vision-pills span { font-size: .85rem; }
+  .hero-scroll-cue { bottom: 4.8rem; }
+  .hero-stat-strip { bottom: 2rem; }
+  .hero-stat-strip span { font-size: .65rem; padding: 0 .9rem; }
+}
+@media (max-height: 660px) {
+  .hero-vision { bottom: 6rem; }
+  .hero-vision-tag { display: none; } /* tagline drops, pills stay */
+  .hero-scroll-cue { display: none; }
+  .hero-stat-strip { bottom: 1rem; }
+}
+
+/* ─── TABLET / SMALL DESKTOP ──────────────────────────────── */
+@media (max-width: 1100px) {
+  .hero-vision { left: 3rem; max-width: 360px; }
+  .hero-vision-tag { font-size: 1rem; }
+}
+
+/* ─── MOBILE ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .collective { grid-template-columns: 1fr; min-height: auto; }
+  .collective-left { padding: 4rem 2rem 2.5rem; }
+  .collective-right { min-height: 55dvh; justify-content: center; }
+  .mv-tiles { max-width: 100%; }
+  .ds-inner { grid-template-columns: 1fr; }
+  .ds-divider { display: none; }
+  .ds-col, .ds-col-right { padding: 3.5rem 2rem; }
+  .squad-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .squad, .contact { padding: 4rem 2rem; }
+  .footer { padding: 4rem 2rem 2.5rem; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
+  .nav-links { display: none; }
+  .hero-type { width: clamp(200px, 88vw, 580px); top: 10dvh; }
+  .hero-vision { left: 1.5rem; bottom: 7rem; max-width: 280px; }
+  .hero-vision-tag { font-size: .95rem; }
+  .hero-vision-pills span { font-size: .82rem; }
+  .hero-match-badge { display: none; }
+  .hero-stat-strip span { font-size: .62rem; padding: 0 .8rem; }
+}
+@media (max-width: 480px) {
+  .hero-type { width: 90vw; top: 8dvh; left: 2vw; }
+  .hero-badge { width: 60px; }
+  .squad-grid { grid-template-columns: 1fr; }
+  .hero-stat-strip { display: none; }
+  .hero-scroll-cue { display: none; }
+  .hero-vision { left: 1.2rem; bottom: 4.5rem; max-width: 240px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+
+/* ─── ADMIN CMS ──────────────────────────────────────────── */
+#admin-login-link {
+  position:fixed; bottom:3.5rem; right:1.5rem; z-index:89500;
+  font-family:'Barlow Condensed'; font-weight:700; font-size:.58rem;
+  letter-spacing:.18em; text-transform:uppercase;
+  background:#111; color:#fff; border:2px solid var(--red-b);
+  padding:.55rem 1.2rem; box-shadow:3px 3px 0 var(--red-b);
+  transition:background .18s, box-shadow .18s;
+}
+#admin-login-link:hover { background:var(--red-b); box-shadow:3px 3px 0 #111; }
+.admin-overlay {
+  position:fixed; inset:0; background:rgba(7,7,7,.75);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  z-index:90000; display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .25s;
+}
+.admin-overlay.open { opacity:1; pointer-events:auto; }
+.admin-modal-box {
+  background:var(--bg); border:2px solid var(--red-b);
+  padding:2.8rem 3rem 2.4rem; max-width:380px; width:90vw;
+  position:relative; box-shadow:6px 6px 0 #111;
+}
+.admin-modal-title {
+  font-family:'DM Sans',sans-serif; font-weight:800; font-size:2rem;
+  color:var(--ink); letter-spacing:-.02em; margin-bottom:.2rem;
+}
+.admin-modal-sub {
+  font-family:'Barlow Condensed'; font-size:.52rem; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--mute); margin-bottom:2rem;
+}
+.admin-field { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1.1rem; }
+.admin-field label { font-family:'Barlow Condensed'; font-size:.5rem; letter-spacing:.22em; text-transform:uppercase; color:var(--mute); }
+.admin-field input {
+  background:#fff; border:1.5px solid rgba(17,17,17,.18); padding:.75rem .9rem;
+  font-family:'Barlow Condensed'; font-size:.9rem; color:var(--ink);
+  outline:none; transition:border-color .2s; width:100%;
+}
+.admin-field input:focus { border-color:var(--red-b); }
+.admin-btn-primary {
+  width:100%; background:var(--red-b); color:#fff; border:none; padding:.9rem;
+  font-family:'Barlow Condensed'; font-weight:700; font-size:.62rem;
+  letter-spacing:.22em; text-transform:uppercase; transition:background .18s; margin-top:.6rem;
+}
+.admin-btn-primary:hover:not(:disabled) { background:var(--red); }
+.admin-btn-primary:disabled { opacity:.5; }
+.admin-modal-close { position:absolute; top:.9rem; right:1.1rem; background:none; border:none; font-size:1.4rem; color:var(--mute); line-height:1; }
+.admin-error { font-family:'Barlow Condensed'; font-size:.56rem; color:var(--red-b); letter-spacing:.07em; margin-top:.5rem; display:none; }
+.admin-error.show { display:block; }
+#adm-bar {
+  position:fixed; bottom:0; left:0; right:0; z-index:89000;
+  background:#111; border-top:2px solid var(--red-b);
+  display:none; align-items:center; height:46px; padding:0 1.4rem;
+}
+#adm-bar.show { display:flex; }
+.adm-label {
+  font-family:'Barlow Condensed'; font-weight:700; font-size:.5rem;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--red-b);
+  margin-right:1.2rem; white-space:nowrap; flex-shrink:0;
+}
+.adm-btn {
+  background:none; border:none; padding:.4rem 1rem;
+  font-family:'Barlow Condensed'; font-weight:700; font-size:.5rem;
+  letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.4);
+  transition:color .18s; border-right:1px solid rgba(255,255,255,.08);
+}
+.adm-btn:hover, .adm-btn.active { color:#fff; }
+#adm-status {
+  margin-left:auto; font-family:'Barlow Condensed'; font-size:.46rem;
+  letter-spacing:.12em; color:rgba(255,255,255,.25); transition:color .3s;
+}
+#adm-status.ok { color:#5fcf80; }
+.adm-logout {
+  background:none; border:none; padding:.4rem .8rem; margin-left:.4rem;
+  font-family:'Barlow Condensed'; font-weight:700; font-size:.48rem;
+  letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.25);
+  transition:color .18s;
+}
+.adm-logout:hover { color:var(--red-b); }
+#adm-toast {
+  position:fixed; top:1.2rem; left:50%; transform:translateX(-50%) translateY(-6px);
+  z-index:99999; background:#111; color:#fff; border-left:4px solid var(--red-b);
+  padding:.75rem 1.4rem; font-family:'Barlow Condensed'; font-size:.7rem;
+  letter-spacing:.1em; text-transform:uppercase; pointer-events:none;
+  opacity:0; transition:opacity .22s, transform .22s; white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+#adm-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+#adm-toast.ok { border-left-color:#5fcf80; }
+#adm-toast.err { border-left-color:var(--red-b); }
+.adm-panel {
+  position:fixed; bottom:46px; left:0; right:0; z-index:88000;
+  background:#F8F3E8; border-top:1px solid rgba(17,17,17,.1);
+  transform:translateY(100%); transition:transform .32s cubic-bezier(0.16,1,0.3,1);
+  max-height:65vh; overflow-y:auto; display:none;
+}
+.adm-panel.open { transform:translateY(0); display:block; }
+.adm-panel-inner { padding:1.8rem 2.4rem 2.4rem; max-width:860px; }
+.adm-panel-title { font-family:'DM Sans',sans-serif; font-weight:800; font-size:1.3rem; color:var(--ink); letter-spacing:-.01em; margin-bottom:1.2rem; }
+.adm-row { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-bottom:.8rem; }
+.adm-field { display:flex; flex-direction:column; gap:.35rem; }
+.adm-field label { font-family:'Barlow Condensed'; font-size:.46rem; letter-spacing:.2em; text-transform:uppercase; color:var(--mute); }
+.adm-input, .adm-select {
+  background:#fff; border:1.5px solid rgba(17,17,17,.14); padding:.6rem .75rem;
+  font-family:'Barlow Condensed'; font-size:.84rem; color:var(--ink);
+  outline:none; width:100%; transition:border-color .18s;
+}
+.adm-input:focus, .adm-select:focus { border-color:var(--red-b); }
+.adm-save {
+  background:var(--red-b); color:#fff; border:none; padding:.6rem 1.6rem;
+  font-family:'Barlow Condensed'; font-weight:700; font-size:.58rem;
+  letter-spacing:.18em; text-transform:uppercase; transition:background .18s; margin-top:.6rem;
+}
+.adm-save:hover { background:var(--red); }
+.adm-add {
+  background:none; border:1.5px dashed rgba(17,17,17,.22); color:var(--mute);
+  padding:.5rem 1.1rem; font-family:'Barlow Condensed'; font-size:.54rem;
+  letter-spacing:.14em; text-transform:uppercase; transition:all .18s; margin-top:.7rem;
+}
+.adm-add:hover { border-color:var(--red-b); color:var(--red-b); }
+.res-edit-row {
+  display:flex; align-items:center; gap:.5rem;
+  padding:.55rem 0; border-bottom:1px solid rgba(17,17,17,.07); flex-wrap:wrap;
+}
+.res-del { background:none; border:1px solid rgba(17,17,17,.14); color:var(--mute); padding:.3rem .6rem; font-size:.7rem; transition:all .18s; }
+.res-del:hover { border-color:var(--red-b); color:var(--red-b); }
+.roster-grid { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.8rem; }
+.roster-chip {
+  display:flex; align-items:center; gap:.45rem; padding:.38rem .75rem;
+  border:1.5px solid rgba(17,17,17,.14); background:#fff; transition:all .18s;
+  font-family:'Barlow Condensed'; font-size:.72rem;
+}
+.roster-chip.xi { border-color:var(--red-b); background:var(--red-b); color:#fff; }
+.chip-num { font-weight:700; }
+.chip-pos { opacity:.55; font-size:.6rem; }
+body.adm-formation .player-node { cursor:grab !important; }
+body.adm-formation .player-node.dragging { opacity:.75 !important; z-index:200; cursor:grabbing !important; }
+/* Formation panel layout */
+.fmn-layout { display:flex; gap:1.8rem; align-items:flex-start; flex-wrap:wrap; }
+.fmn-pitch-col { flex:0 0 min(220px,40%); }
+.fmn-pitch-label {
+  font-family:'Barlow Condensed'; font-size:.48rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--mute); text-align:center; margin-top:.55rem;
+}
+.fmn-roster-col { flex:1; min-width:180px; }
+.fmn-roster-hint {
+  font-family:'Barlow Condensed'; font-size:.52rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--mute); margin-bottom:.75rem;
+}
+/* Panel pitch */
+#adm-pitch {
+  position:relative; width:100%; aspect-ratio:2/3;
+  background:
+    repeating-linear-gradient(to bottom,rgba(0,0,0,.04) 0px,rgba(0,0,0,.04) 28px,transparent 28px,transparent 56px),
+    linear-gradient(155deg,#296929 0%,#2f6e2f 45%,#2a6d2a 100%);
+  box-shadow:3px 3px 0 var(--red-b);
+}
+#adm-pitch .player-node { opacity:1 !important; animation:none !important; }
+#adm-pitch .p-circle { width:22px !important; height:22px !important; font-size:.48rem !important; box-shadow:0 2px 5px rgba(0,0,0,.4) !important; }
+#adm-pitch .p-name { font-size:.36rem !important; }
+#adm-pitch .p-pos { display:none !important; }
+.ct-field { margin-bottom:.9rem; }
+.ct-label { display:block; font-family:'Barlow Condensed'; font-size:.46rem; letter-spacing:.2em; text-transform:uppercase; color:var(--mute); margin-bottom:.35rem; }
+.ct-textarea {
+  background:#fff; border:1.5px solid rgba(17,17,17,.12); padding:.6rem .8rem;
+  font-family:'Barlow Condensed'; font-size:.84rem; color:var(--ink);
+  width:100%; resize:vertical; outline:none; min-height:3.5rem;
+  transition:border-color .18s;
+}
+.ct-textarea:focus { border-color:var(--red-b); }
+
+/* ── INLINE EDIT MODE ───────────────────────────────── */
+body.cfc-edit [data-cfc-key] {
+  outline: 2px dashed rgba(156,15,28,.5) !important;
+  outline-offset: 4px;
+  cursor: text !important;
+  border-radius: 3px;
+  min-height: 1em;
+  transition: outline-color .15s, background .15s;
+}
+body.cfc-edit [data-cfc-key]:hover {
+  outline-color: var(--amber) !important;
+  background: rgba(200,146,10,.06);
+}
+body.cfc-edit [data-cfc-key]:focus {
+  outline: 2px solid var(--amber) !important;
+  background: rgba(200,146,10,.09) !important;
+  caret-color: var(--amber);
+}
+/* floating edit bar that appears at top in edit mode */
+#adm-edit-float {
+  position: fixed; top: -100px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 99100; display: flex; align-items: center; gap: .9rem;
+  background: #111; border: 2px solid var(--red-b);
+  padding: .65rem 1.4rem;
+  box-shadow: 0 6px 28px rgba(0,0,0,.4);
+  white-space: nowrap;
+  transition: top .28s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: none;
+}
+body.cfc-edit #adm-edit-float {
+  top: 1rem;
+  pointer-events: auto;
+}
+#adm-edit-float span {
+  font-family: 'Barlow Condensed'; font-size: .6rem;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+}
+.adm-edit-save {
+  font-family: 'Barlow Condensed'; font-weight: 700; font-size: .62rem;
+  letter-spacing: .18em; text-transform: uppercase;
+  background: var(--red-b); color: #fff; border: none;
+  padding: .45rem 1.1rem; cursor: pointer;
+  transition: background .15s;
+}
+.adm-edit-save:hover { background: #c0112a; }
+.adm-edit-cancel {
+  font-family: 'Barlow Condensed'; font-weight: 600; font-size: .6rem;
+  letter-spacing: .15em; text-transform: uppercase;
+  background: none; color: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.18);
+  padding: .4rem .9rem; cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.adm-edit-cancel:hover { color: #fff; border-color: rgba(255,255,255,.5); }
+/* tooltip label on editable elements */
+body.cfc-edit [data-cfc-key]::before {
+  content: attr(data-cfc-label);
+  position: absolute; top: -1.4rem; left: 0;
+  font-family: 'Barlow Condensed'; font-size: .42rem;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--red-b); background: rgba(17,17,17,.85);
+  padding: .15rem .4rem; pointer-events: none;
+  opacity: 0; transition: opacity .15s;
+  white-space: nowrap; z-index: 1000;
+}
+body.cfc-edit [data-cfc-key] { position: relative; }
+body.cfc-edit [data-cfc-key]:hover::before { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-back" href="index.html">&#8592; Confluence</a>
+  <div class="nav-logo"><img src="images/fc-logo.png" alt="Confluence FC"></div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#fixture">Fixture</a>
+    <a href="#squad">Squad</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div id="nav-live" class="nav-live">Live</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <!-- Accent art — clipped to hero by overflow:hidden -->
+  <img class="page-accents" src="images/first 2 screen accents.png" aria-hidden="true" alt="">
+
+  <!-- Faint pitch markings — CSS only, atmosphere -->
+  <svg class="hero-pitch-ghost" viewBox="0 0 300 450" aria-hidden="true">
+    <g stroke="#111" stroke-width="1.2" fill="none">
+      <rect x="8" y="8" width="284" height="434"/>
+      <line x1="8" y1="225" x2="292" y2="225"/>
+      <circle cx="150" cy="225" r="38"/>
+      <rect x="72" y="8" width="156" height="68"/>
+      <rect x="108" y="8" width="84" height="26"/>
+      <rect x="72" y="374" width="156" height="68"/>
+      <rect x="108" y="416" width="84" height="26"/>
+    </g>
+    <circle cx="150" cy="225" r="2.5" fill="#111" stroke="none"/>
+  </svg>
+
+  <!-- Bottom red vignette -->
+  <div class="hero-vignette" aria-hidden="true"></div>
+
+  <!-- Next match badge — top-right, populated by JS -->
+  <div class="hero-match-badge" id="hero-match-badge" aria-label="Next fixture">
+    <span class="hmb-next">Next</span>
+    <span class="hmb-opp" id="hmb-opp">Upcoming</span>
+    <span class="hmb-sep">·</span>
+    <span class="hmb-time" id="hmb-time">Sat 12:30</span>
+  </div>
+
+  <img class="hero-type" src="images/text hero.png" aria-hidden="true" alt="">
+  <a class="hero-badge" href="#about" aria-label="Confluence FC">
+    <img src="images/fc-logo.png" alt="CFC crest">
+  </a>
+  <div class="hero-ctas">
+    <a class="btn-red" href="#about">Our Story</a>
+    <a class="btn-outline" href="#fixture">Next Match &#8595;</a>
+  </div>
+
+  <!-- Vision strip — bottom-left, editable via CMS -->
+  <div class="hero-vision">
+    <p class="hero-vision-tag" data-cfc-key="hero_tagline">On the road to becoming New Zealand's leading football development organisation — creating a model of togetherness that can eventually be replicated around the world.</p>
+    <div class="hero-vision-pills">
+      <span data-cfc-key="hero_pill1">Football · Music · Media</span>
+      <span data-cfc-key="hero_pill2">Youth Academy · 2026</span>
+      <span data-cfc-key="hero_pill3">NZ Football Pyramid · 2028</span>
+    </div>
+  </div>
+
+  <!-- Scroll cue — bottom-right -->
+  <div class="hero-scroll-cue" aria-hidden="true">
+    <span class="hero-scroll-cue-label">Explore</span>
+    <span class="hero-scroll-arrow">&#8595;</span>
+  </div>
+
+  <!-- Stat strip — bottom edge -->
+  <div class="hero-stat-strip" aria-hidden="true">
+    <span>NZCFL Championship</span>
+    <span>West Auckland</span>
+    <span>Est. 2025</span>
+    <span>Year One</span>
+  </div>
+</section>
+
+<!-- COLLECTIVE / ABOUT -->
+<section class="collective" id="about">
+  <div class="collective-left">
+    <h2 class="collective-heading reveal" data-cfc-key="collective_heading">From the<br>collective,<br>for the<br>collective.</h2>
+    <div class="mv-tiles reveal">
+      <div class="mv-tile">
+        <span class="mv-tile-num">01</span>
+        <span class="mv-tile-label">Mission</span>
+        <p class="mv-tile-body" data-cfc-key="cb1">Make quality football genuinely accessible. Build a real pathway for players, coaches and communities who deserve better.</p>
+      </div>
+      <div class="mv-tile">
+        <span class="mv-tile-num">02</span>
+        <span class="mv-tile-label">Vision</span>
+        <p class="mv-tile-body" data-cfc-key="cb2">Become NZ's leading football development organisation — and a model that can be replicated around the world.</p>
+      </div>
+      <div class="mv-tile">
+        <span class="mv-tile-num">03</span>
+        <span class="mv-tile-label">Collective</span>
+        <p class="mv-tile-body" data-cfc-key="cb3">Football. Music. Media. Three pillars, one direction. Different streams building something greater.</p>
+      </div>
+      <div class="mv-tile">
+        <span class="mv-tile-num">04</span>
+        <span class="mv-tile-label">Roadmap</span>
+        <p class="mv-tile-body" data-cfc-key="cb4">Academy · 2026. NZ Pyramid · 2028. You are looking at Year One.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4-pointed SVG starburst between columns, matching reference -->
+  <svg class="collective-star" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M100,8 C97,55 145,97 192,100 C145,103 97,145 100,192 C103,145 55,103 8,100 C55,97 103,55 100,8 Z" fill="#8B1A1A"/>
+  </svg>
+
+  <!-- Amaan treated photo -->
+  <div class="collective-right">
+    <img class="collective-player" src="images/amaan-abstract.png" alt="Confluence FC — Amaan">
+  </div>
+</section>
+
+<!-- FIXTURE + RESULTS: single viewport, side by side -->
+<div class="double-scroll" id="fixture">  <div class="ds-inner">
+    <!-- Left: Next Fixture + Countdown + Gaffer Review -->
+    <div class="ds-col">
+      <p class="ds-label reveal"><span data-cfc-key="fixture_label">Next Fixture</span></p>
+      <h2 class="ds-heading reveal">vs <span id="ds-opp">—</span></h2>
+      <p id="ds-meta" class="ds-meta reveal">—</p>
+      <div class="countdown reveal">
+        <div class="cd-unit"><span id="cd-d" class="cd-num">00</span><span class="cd-lbl">Days</span></div>
+        <div class="cd-unit"><span id="cd-h" class="cd-num">00</span><span class="cd-lbl">Hrs</span></div>
+        <div class="cd-unit"><span id="cd-m" class="cd-num">00</span><span class="cd-lbl">Min</span></div>
+        <div class="cd-unit"><span id="cd-s" class="cd-num">00</span><span class="cd-lbl">Sec</span></div>
+      </div>
+      <!-- Gaffer's Review -->
+      <div class="gaffer-block reveal">
+        <div class="gaffer-eyebrow">
+          <span class="gaffer-line"></span>
+          <span data-cfc-key="gaffer_label">Gaffer's Notes</span>
+        </div>
+        <p class="gaffer-match" data-cfc-key="gaffer_match">vs North Shore United — W 3–1</p>
+        <blockquote class="gaffer-quote" data-cfc-key="gaffer_review">The lads were unreal on Saturday. We pressed high and never let them settle. Proud of every single one of them — this is just the beginning.</blockquote>
+      </div>
+    </div>
+    <div class="ds-divider"></div>
+    <!-- Right: Recent Results -->
+    <div class="ds-col ds-col-right">
+      <p class="ds-label reveal"><span data-cfc-key="results_label">Recent Form</span></p>
+      <h2 class="ds-heading reveal" style="margin-bottom:1.6rem" data-cfc-key="results_heading">Results</h2>
+      <div id="ds-results" class="reveal"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SQUAD -->
+<section class="squad" id="squad">
+  <img class="squad-bg-stars" src="images/abstract-stars.png" aria-hidden="true" alt="">
+  <div class="section-eyebrow reveal" data-cfc-key="section_eyebrow">4 – 3 – 3</div>
+  <h2 class="section-heading reveal" data-cfc-key="section_heading">Starting <em>Eleven</em></h2>
+
+  <div class="squad-grid">
+    <!-- LEFT: Full squad list -->
+    <div id="squad-list-col" class="reveal"></div>
+
+    <!-- MIDDLE: Text -->
+    <div class="reveal">
+      <p class="squad-story-eyebrow" data-cfc-key="squad_eyebrow">The Squad</p>
+      <h3 class="squad-story-heading" data-cfc-key="squad_story_heading">The first<br>chapter<br><em>starts here.</em></h3>
+      <div class="squad-story-body">
+        <p data-cfc-key="ss1">Year One. Drawn from across Auckland, this squad stepped into the NZCFL Championship to compete, represent and build something that lasts.</p>
+        <p data-cfc-key="ss2">Every match is documented — highlights, training, match days. These players aren't just competing. <strong>They are the story being written.</strong></p>
+      </div>
+    </div>
+
+    <!-- RIGHT: Formation pitch -->
+    <div>
+      <div class="formation-wrap reveal">
+        <div class="pitch" id="page-pitch">
+          <svg class="pitch-svg" viewBox="0 0 300 450" aria-hidden="true">
+            <g stroke="rgba(255,255,255,.11)" stroke-width="1" fill="none">
+              <line x1="39" y1="333" x2="105" y2="333"/><line x1="105" y1="333" x2="195" y2="333"/>
+              <line x1="195" y1="333" x2="261" y2="333"/>
+              <line x1="66" y1="239" x2="150" y2="230"/><line x1="150" y1="230" x2="234" y2="239"/>
+              <line x1="42" y1="126" x2="150" y2="99"/><line x1="150" y1="99" x2="258" y2="126"/>
+              <line x1="150" y1="400" x2="150" y2="333"/>
+              <line x1="39" y1="333" x2="66" y2="239"/><line x1="261" y1="333" x2="234" y2="239"/>
+              <line x1="105" y1="333" x2="150" y2="230"/><line x1="195" y1="333" x2="150" y2="230"/>
+              <line x1="66" y1="239" x2="42" y2="126"/><line x1="234" y1="239" x2="258" y2="126"/>
+              <line x1="150" y1="230" x2="150" y2="99"/>
+            </g>
+            <g stroke="rgba(255,255,255,.28)" stroke-width="1.2" fill="none">
+              <rect x="8" y="8" width="284" height="434"/>
+              <line x1="8" y1="225" x2="292" y2="225"/>
+              <circle cx="150" cy="225" r="38"/>
+              <rect x="72" y="8" width="156" height="68"/>
+              <rect x="108" y="8" width="84" height="26"/>
+              <rect x="72" y="374" width="156" height="68"/>
+              <rect x="108" y="416" width="84" height="26"/>
+            </g>
+            <circle cx="150" cy="225" r="2.5" fill="rgba(255,255,255,.35)" stroke="none"/>
+            <circle cx="150" cy="60"  r="2"   fill="rgba(255,255,255,.2)"  stroke="none"/>
+            <circle cx="150" cy="390" r="2"   fill="rgba(255,255,255,.2)"  stroke="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <h2 class="contact-heading reveal" data-cfc-key="contact_heading">Get in<br>Touch.</h2>
+  <div id="contact-links"></div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-top">
+    <div>
+      <div class="footer-badge"><img src="images/fc-logo.png" alt="CFC"></div>
+      <p class="footer-name">Confluence FC</p>
+      <p class="footer-league">NZCFL Championship &middot; West Auckland</p>
+    </div>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="#about">About</a>
+      <a href="#fixture">Fixture</a>
+      <a href="#squad">Squad</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+  <div class="footer-bottom">
+    <span id="footer-copy" class="footer-copy"></span>
+    <span id="footer-handle" class="footer-copy"></span>
+  </div>
+  <div class="footer-bg" aria-hidden="true">CFC</div>
+</footer>
+
+<!-- ADMIN: toast notification -->
+<div id="adm-toast"></div>
+
+<!-- ADMIN: inline edit float bar -->
+<div id="adm-edit-float">
+  <span>Editing page — click any highlighted text</span>
+  <button class="adm-edit-save" id="adm-edit-save-btn">Save All Changes</button>
+  <button class="adm-edit-cancel" id="adm-edit-cancel-btn">Cancel</button>
+</div>
+
+<!-- ADMIN: login trigger -->
+<button id="admin-login-link">Site Admin</button>
+
+<!-- ADMIN: login modal -->
+<div id="adm-overlay" class="admin-overlay">
+  <div class="admin-modal-box">
+    <button id="adm-close" class="admin-modal-close">&times;</button>
+    <p class="admin-modal-title">Admin</p>
+    <p class="admin-modal-sub">Confluence FC &middot; Staff Access</p>
+    <div class="admin-field">
+      <label for="adm-email">Email</label>
+      <input type="email" id="adm-email" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="admin-field">
+      <label for="adm-password">Password</label>
+      <input type="password" id="adm-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
+    </div>
+    <p id="adm-err" class="admin-error"></p>
+    <button id="adm-login-btn" class="admin-btn-primary">Sign In</button>
+  </div>
+</div>
+
+<!-- ADMIN: toolbar -->
+<div id="adm-bar">
+  <span class="adm-label">&#9881; Admin</span>
+  <button id="adm-btn-fixture"   class="adm-btn" onclick="_cfcPanel('fixture')">Fixture</button>
+  <button id="adm-btn-results"   class="adm-btn" onclick="_cfcPanel('results')">Results</button>
+  <button id="adm-btn-formation" class="adm-btn" onclick="_cfcPanel('formation')">Formation</button>
+  <button id="adm-btn-edit"      class="adm-btn" onclick="_cfcToggleEdit()">&#9998; Edit Page</button>
+  <span id="adm-status"></span>
+  <button id="adm-logout" class="adm-logout">Logout</button>
+</div>
+
+<!-- ADMIN: fixture panel -->
+<div id="adm-panel-fixture" class="adm-panel">
+  <div class="adm-panel-inner">
+    <p class="adm-panel-title">Next Fixture</p>
+    <div class="adm-row">
+      <div class="adm-field"><label>Opponent</label><input id="fx-opp" class="adm-input" type="text" placeholder="Opponent FC"></div>
+      <div class="adm-field"><label>Kickoff (NZ local time)</label><input id="fx-ko" class="adm-input" type="datetime-local"></div>
+    </div>
+    <div class="adm-row">
+      <div class="adm-field"><label>Venue</label><input id="fx-venue" class="adm-input" type="text" placeholder="Ground name, Location"></div>
+      <div class="adm-field"><label>Home / Away</label><select id="fx-ha" class="adm-select"><option value="H">Home</option><option value="A">Away</option></select></div>
+    </div>
+    <div class="adm-field"><label>Competition</label><input id="fx-comp" class="adm-input" type="text" placeholder="League name"></div>
+    <button id="fx-save" class="adm-save">Save Fixture</button>
+  </div>
+</div>
+
+<!-- ADMIN: results panel -->
+<div id="adm-panel-results" class="adm-panel">
+  <div class="adm-panel-inner">
+    <p class="adm-panel-title">Results</p>
+    <div id="res-list"></div>
+    <button id="res-add" class="adm-add">+ Add Result</button>
+  </div>
+</div>
+
+<!-- ADMIN: formation panel -->
+<div id="adm-panel-formation" class="adm-panel">
+  <div class="adm-panel-inner">
+    <p class="adm-panel-title">Formation &amp; Squad</p>
+    <div class="fmn-layout">
+      <div class="fmn-pitch-col">
+        <div id="adm-pitch" class="pitch">
+          <svg class="pitch-svg" viewBox="0 0 300 450" aria-hidden="true">
+            <g stroke="rgba(255,255,255,.11)" stroke-width="1" fill="none">
+              <line x1="39" y1="333" x2="105" y2="333"/><line x1="105" y1="333" x2="195" y2="333"/>
+              <line x1="195" y1="333" x2="261" y2="333"/>
+              <line x1="66" y1="239" x2="150" y2="230"/><line x1="150" y1="230" x2="234" y2="239"/>
+              <line x1="42" y1="126" x2="150" y2="99"/><line x1="150" y1="99" x2="258" y2="126"/>
+              <line x1="150" y1="400" x2="150" y2="333"/>
+              <line x1="39" y1="333" x2="66" y2="239"/><line x1="261" y1="333" x2="234" y2="239"/>
+              <line x1="105" y1="333" x2="150" y2="230"/><line x1="195" y1="333" x2="150" y2="230"/>
+              <line x1="66" y1="239" x2="42" y2="126"/><line x1="234" y1="239" x2="258" y2="126"/>
+              <line x1="150" y1="230" x2="150" y2="99"/>
+            </g>
+            <g stroke="rgba(255,255,255,.28)" stroke-width="1.2" fill="none">
+              <rect x="8" y="8" width="284" height="434"/>
+              <line x1="8" y1="225" x2="292" y2="225"/>
+              <circle cx="150" cy="225" r="38"/>
+              <rect x="72" y="8" width="156" height="68"/>
+              <rect x="108" y="8" width="84" height="26"/>
+              <rect x="72" y="374" width="156" height="68"/>
+              <rect x="108" y="416" width="84" height="26"/>
+            </g>
+            <circle cx="150" cy="225" r="2.5" fill="rgba(255,255,255,.35)" stroke="none"/>
+            <circle cx="150" cy="60"  r="2"   fill="rgba(255,255,255,.2)"  stroke="none"/>
+            <circle cx="150" cy="390" r="2"   fill="rgba(255,255,255,.2)"  stroke="none"/>
+          </svg>
+        </div>
+        <p class="fmn-pitch-label">Drag players to reposition</p>
+      </div>
+      <div class="fmn-roster-col">
+        <p class="fmn-roster-hint">Click name to toggle Starting XI (max 11)</p>
+        <div id="roster-grid" class="roster-grid"></div>
+        <button id="formation-save" class="adm-save" style="margin-top:1.2rem">Save Formation</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN: content panel -->
+
+
+<!-- Resize handle — positioned by JS at the bottom-right of the hovered editable asset -->
+<div id="ed-rh"></div>
+
+<!-- ASSET EDITOR PANEL -->
+<div class="ed-panel" id="ed-panel">
+  <div class="ed-tools" id="ed-tools">
+    <p class="ed-tools-title">Asset Editor</p>
+    <div class="ed-asset-list" id="ed-asset-list"></div>
+    <button class="ed-copy" id="ed-copy">Copy CSS Positions</button>
+    <div class="ed-output" id="ed-output"></div>
+    <p class="ed-hint">Drag to move. Red corner handle to resize. Auto-saved.</p>
+  </div>
+  <button class="ed-toggle" id="ed-toggle">&#9998; Edit Assets</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function () {
+  'use strict';
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* ── SUPABASE ───────────────────────────────────────────── */
+  var SB = window.supabase.createClient(
+    'https://vfsotxguyjlcsxlceerd.supabase.co',
+    'sb_publishable_5WS97ilRB7SMCoKxnATOeQ_7C22IBJH'
+  );
+
+  /* ── CLUB CONSTANTS ─────────────────────────────────────── */
+  var CLUB = {
+    name:'Confluence FC', founded:2025,
+    league:'NZCFL Championship', handle:'@confluencefc',
+    email:'admin@confluencefc.co.nz',
+    instagram:'https://www.instagram.com/confluencefc',
+    youtube:'https://www.youtube.com/@confluencefc',
+  };
+
+  /* ── FALLBACK DATA (used if Supabase unavailable) ───────── */
+  var FB = {
+    fixture: { id:null, opponent:'Waitakere City FC', kickoff:'2025-08-09T15:00:00+12:00', venue:'Trusts Arena, Henderson', home_away:'H', competition:'NZCFL Championship' },
+    results: [
+      { opponent:'North Shore United', goals_for:3, goals_against:1, match_date:'2025-07-26', home_away:'H' },
+      { opponent:'Manukau City FC',    goals_for:2, goals_against:2, match_date:'2025-07-19', home_away:'A' },
+      { opponent:'Tasman United',      goals_for:4, goals_against:5, match_date:'2025-07-12', home_away:'H' },
+      { opponent:'Glenfield Rovers',   goals_for:1, goals_against:0, match_date:'2025-07-05', home_away:'A' },
+    ],
+    squad: [
+      { id:'fb01', name:'Nats',     number:1,  position:'GK',  in_xi:true,  pitch_x:50, pitch_y:87, sort_order:1  },
+      { id:'fb02', name:'Yash',     number:3,  position:'LB',  in_xi:true,  pitch_x:13, pitch_y:74, sort_order:2  },
+      { id:'fb03', name:'Taj',      number:5,  position:'LCB', in_xi:true,  pitch_x:35, pitch_y:74, sort_order:3  },
+      { id:'fb04', name:'Krishant', number:6,  position:'RCB', in_xi:true,  pitch_x:65, pitch_y:74, sort_order:4  },
+      { id:'fb05', name:'Leo',      number:2,  position:'RB',  in_xi:true,  pitch_x:87, pitch_y:74, sort_order:5  },
+      { id:'fb06', name:'Daimo',    number:4,  position:'LDM', in_xi:true,  pitch_x:22, pitch_y:53, sort_order:6  },
+      { id:'fb07', name:'Josh',     number:16, position:'CM',  in_xi:true,  pitch_x:50, pitch_y:51, sort_order:7  },
+      { id:'fb08', name:'Sid',      number:8,  position:'RDM', in_xi:true,  pitch_x:78, pitch_y:53, sort_order:8  },
+      { id:'fb09', name:'Amaan',    number:11, position:'LW',  in_xi:true,  pitch_x:14, pitch_y:28, sort_order:9  },
+      { id:'fb10', name:'Taran',    number:9,  position:'ST',  in_xi:true,  pitch_x:50, pitch_y:21, sort_order:10 },
+      { id:'fb11', name:'Kysh',     number:7,  position:'RW',  in_xi:true,  pitch_x:86, pitch_y:28, sort_order:11 },
+      { id:'fb12', name:'Vivek',    number:12, position:'RB',  in_xi:false, pitch_x:50, pitch_y:50, sort_order:12 },
+      { id:'fb13', name:'Zak',      number:13, position:'CB',  in_xi:false, pitch_x:50, pitch_y:50, sort_order:13 },
+      { id:'fb14', name:'Harry',    number:14, position:'DM',  in_xi:false, pitch_x:50, pitch_y:50, sort_order:14 },
+      { id:'fb15', name:'Loki',     number:15, position:'DM',  in_xi:false, pitch_x:50, pitch_y:50, sort_order:15 },
+      { id:'fb16', name:'Baljot',   number:17, position:'LM',  in_xi:false, pitch_x:50, pitch_y:50, sort_order:16 },
+      { id:'fb17', name:'Yashok',   number:18, position:'ST',  in_xi:false, pitch_x:50, pitch_y:50, sort_order:17 },
+      { id:'fb18', name:'Vishva',   number:19, position:'GK',  in_xi:false, pitch_x:50, pitch_y:50, sort_order:18 },
+    ],
+    content: {
+      collective_heading: 'From the<br>collective,<br>for the<br>collective.',
+      cb1: 'Confluence started as a group of mates who wanted to play. In 2025 we entered the NZCFL Championship. But this has always been about more than Saturdays.',
+      cb2: 'Our mission is to make quality football accessible across Auckland and build a real pathway for players, coaches and communities to grow. The club sits inside a wider collective spanning football, music and media.',
+      cb3: 'The goal is to become New Zealand\'s leading football development organisation by 2029. The academy is being built. The pathway is coming. This is year one.',
+      fixture_label: 'Next Fixture',
+      results_label: 'Recent Form',
+      results_heading: 'Results',
+      gaffer_label: 'Gaffer\'s Notes',
+      gaffer_match: 'vs North Shore United — W 3–1',
+      gaffer_review: 'The lads were unreal on Saturday. We pressed high and never let them settle. Proud of every single one of them — this is just the beginning.',
+      section_eyebrow: '4 – 3 – 3',
+      section_heading: 'Starting <em>Eleven</em>',
+      squad_eyebrow: 'The Squad',
+      squad_story_heading: 'Unproven.<br>Unbothered.<br><em>Unstoppable.</em>',
+      ss1: 'Most of this squad had never played competitive football before this season. Not a single academy graduate. Not a single player with a trophy to their name from a league setting.',
+      ss2: 'Just a group of mates — collective-raised, West Auckland-forged — who decided that the lack of a football pedigree was <strong>not going to stop them</strong> from making noise in the NZCFL Championship.',
+      ss3: 'We are not naive about where we stand. We know what we are up against. And that is exactly the kind of storm that fuels us — the kind you do not see coming until it has already arrived.',
+      contact_heading: 'Get in<br>Touch.',
+    },
+  };
+
+  /* ── FETCH FROM SUPABASE ────────────────────────────────── */
+  var D = { fixture:FB.fixture, results:FB.results, squad:FB.squad, content:Object.assign({},FB.content) };
+
+  try {
+    var res = await Promise.all([
+      SB.from('fixtures').select('*').order('kickoff').limit(1),
+      SB.from('results').select('*').order('match_date',{ascending:false}).limit(10),
+      SB.from('squad').select('*').order('sort_order'),
+      SB.from('site_content').select('*'),
+    ]);
+    if (res[0].data && res[0].data.length) D.fixture = res[0].data[0];
+    if (res[1].data && res[1].data.length) D.results = res[1].data;
+    if (res[2].data && res[2].data.length) D.squad   = res[2].data;
+    if (res[3].data && res[3].data.length) {
+      res[3].data.forEach(function(c){ D.content[c.key] = c.value; });
+    }
+  } catch(e) { console.warn('[CFC] Supabase unavailable — using fallback data'); }
+
+  /* expose globally for admin module */
+  window._CFC = { SB:SB, D:D, FB:FB };
+
+  /* ── CONTENT MAP ────────────────────────────────────────── */
+  var CM = [
+    { key:'collective_heading', sel:'[data-cfc-key="collective_heading"]', label:'About — Heading' },
+    { key:'cb1',                sel:'[data-cfc-key="cb1"]',                label:'About — Tile 1 (Mission)' },
+    { key:'cb2',                sel:'[data-cfc-key="cb2"]',                label:'About — Tile 2 (Vision)' },
+    { key:'cb3',                sel:'[data-cfc-key="cb3"]',                label:'About — Tile 3 (Collective)' },
+    { key:'cb4',                sel:'[data-cfc-key="cb4"]',                label:'About — Tile 4 (Roadmap)' },
+    { key:'hero_tagline',       sel:'[data-cfc-key="hero_tagline"]',       label:'Hero — Tagline' },
+    { key:'hero_pill1',         sel:'[data-cfc-key="hero_pill1"]',         label:'Hero — Pill 1' },
+    { key:'hero_pill2',         sel:'[data-cfc-key="hero_pill2"]',         label:'Hero — Pill 2' },
+    { key:'hero_pill3',         sel:'[data-cfc-key="hero_pill3"]',         label:'Hero — Pill 3' },
+    { key:'fixture_label',      sel:'[data-cfc-key="fixture_label"]',      label:'Fixture — Label' },
+    { key:'results_label',      sel:'[data-cfc-key="results_label"]',      label:'Results — Label' },
+    { key:'results_heading',    sel:'[data-cfc-key="results_heading"]',    label:'Results — Heading' },
+    { key:'gaffer_label',       sel:'[data-cfc-key="gaffer_label"]',       label:'Gaffer — Eyebrow' },
+    { key:'gaffer_match',       sel:'[data-cfc-key="gaffer_match"]',       label:'Gaffer — Match Ref' },
+    { key:'gaffer_review',      sel:'[data-cfc-key="gaffer_review"]',      label:'Gaffer — Review Text' },
+    { key:'section_eyebrow',    sel:'[data-cfc-key="section_eyebrow"]',    label:'Squad — Formation' },
+    { key:'section_heading',    sel:'[data-cfc-key="section_heading"]',    label:'Squad — Section Title' },
+    { key:'squad_eyebrow',      sel:'[data-cfc-key="squad_eyebrow"]',      label:'Squad — Eyebrow' },
+    { key:'squad_story_heading',sel:'[data-cfc-key="squad_story_heading"]',label:'Squad — Heading' },
+    { key:'ss1',                sel:'[data-cfc-key="ss1"]',                label:'Squad — Para 1' },
+    { key:'ss2',                sel:'[data-cfc-key="ss2"]',                label:'Squad — Para 2' },
+    { key:'ss3',                sel:'[data-cfc-key="ss3"]',                label:'Squad — Para 3' },
+    { key:'contact_heading',    sel:'[data-cfc-key="contact_heading"]',    label:'Contact — Heading' },
+  ];
+  window._CFC.CM = CM;
+
+  /* ── RENDER FUNCTIONS ───────────────────────────────────── */
+  function renderFixture(f) {
+    f = f || D.fixture;
+    var oppEl = $('ds-opp'); if(oppEl) oppEl.textContent = f ? f.opponent : '—';
+    var metaEl = $('ds-meta');
+    if (metaEl && f) {
+      var ko = new Date(f.kickoff);
+      metaEl.textContent = (f.home_away==='H'?'Home':'Away') + ' · ' + (f.venue||'')
+        + ' · ' + ko.toLocaleDateString('en-NZ',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+        + ' · ' + ko.toLocaleTimeString('en-NZ',{hour:'2-digit',minute:'2-digit',hour12:true});
+    }
+    window._kickoff = f ? f.kickoff : null;
+    /* Update hero match badge */
+    var hOpp = $('hmb-opp'), hTime = $('hmb-time');
+    if (hOpp && f) {
+      hOpp.textContent = 'vs ' + f.opponent;
+      var ko2 = new Date(f.kickoff);
+      hTime.textContent = ko2.toLocaleDateString('en-NZ',{weekday:'short'}).toUpperCase()
+        + ' ' + ko2.toLocaleTimeString('en-NZ',{hour:'2-digit',minute:'2-digit',hour12:false});
+    }
+  }
+
+  function renderResults(results) {
+    results = results || D.results;
+    var el = $('ds-results'); if (!el) return;
+    el.innerHTML = results.map(function(r, idx) {
+      var cls = r.goals_for > r.goals_against ? 'w' : r.goals_for === r.goals_against ? 'd' : 'l';
+      var d = new Date(r.match_date);
+      var ds = isNaN(d.getTime()) ? (r.match_date||'') : d.toLocaleDateString('en-NZ',{day:'numeric',month:'short'});
+      return '<div class="result-row" data-res-idx="'+idx+'">'
+        +'<span class="r-date">'+ds+'</span>'
+        +'<span class="r-ha">'+(r.home_away==='H'?'H':'A')+'</span>'
+        +'<span class="r-opp">'+r.opponent+'</span>'
+        +'<span class="r-score '+cls+'">'+r.goals_for+'&ndash;'+r.goals_against+'</span>'
+        +'</div>';
+    }).join('');
+  }
+
+  function _buildPlayerNode(p){
+    var node = document.createElement('div');
+    node.className = 'player-node';
+    node.dataset.pid = p.id;
+    node.style.cssText = '--px:'+p.pitch_x+'%;--py:'+p.pitch_y+'%;';
+    node.innerHTML = '<div class="p-circle'+(p.position==='GK'?' gk':'')+'">'+p.number+'</div>'
+      +'<span class="p-name">'+p.name+'</span><span class="p-pos">'+p.position+'</span>';
+    return node;
+  }
+
+  function renderFormation(squad) {
+    squad = squad || D.squad;
+    var pitch = $('page-pitch'); if (!pitch) return;
+    pitch.querySelectorAll('.player-node').forEach(function(n){ n.remove(); });
+    squad.filter(function(p){ return p.in_xi; }).forEach(function(p){ pitch.appendChild(_buildPlayerNode(p)); });
+  }
+
+  function renderSquadList(squad) {
+    squad = squad || D.squad;
+    var el = $('squad-list-col'); if (!el) return;
+    var sorted = squad.slice().sort(function(a,b){ return (a.number||99)-(b.number||99); });
+    var half = Math.ceil(sorted.length / 2);
+    var col1 = sorted.slice(0, half);
+    var col2 = sorted.slice(half);
+    function row(p) {
+      return '<div class="sq-player">'
+        +'<span class="sq-num">'+String(p.number||'?').padStart(2,'0')+'</span>'
+        +'<span class="sq-name">'+p.name+'</span>'
+        +'<span class="sq-pos">'+p.position+'</span>'
+        +'</div>';
+    }
+    var c1 = col1.map(row).join('');
+    var c2 = col2.map(row).join('');
+    el.innerHTML = '<p class="sq-col-header">Squad</p>'
+      + '<div class="sq-two-col">'
+      + '<div class="sq-sub">'+c1+'</div>'
+      + '<div class="sq-sub">'+c2+'</div>'
+      + '</div>';
+  }
+
+  function renderBench(squad) { renderSquadList(squad); }
+
+  function renderContent(content) {
+    content = content || D.content;
+    CM.forEach(function(m) {
+      var el = document.querySelector(m.sel);
+      if (el && content[m.key] !== undefined) el.innerHTML = content[m.key];
+    });
+  }
+
+  window._CFC.R = { renderFixture:renderFixture, renderResults:renderResults, renderFormation:renderFormation, renderBench:renderBench, renderSquadList:renderSquadList, renderContent:renderContent };
+
+  /* ── INITIAL RENDER ─────────────────────────────────────── */
+  renderFixture(); renderResults(); renderFormation(); renderSquadList(); renderContent();
+
+  /* ── CUSTOM CURSOR ──────────────────────────────────────── */
+  var ring = document.createElement('div'); ring.className = 'cur-ring';
+  var dot  = document.createElement('div'); dot.className  = 'cur-dot';
+  document.body.appendChild(ring); document.body.appendChild(dot);
+  var mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',function(e){ mx=e.clientX; my=e.clientY; dot.style.left=mx+'px'; dot.style.top=my+'px'; });
+  (function loop(){ rx+=(mx-rx)*.12; ry+=(my-ry)*.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(loop); })();
+  document.querySelectorAll('a,button').forEach(function(el){
+    el.addEventListener('mouseenter',function(){ ring.classList.add('big'); dot.classList.add('small'); });
+    el.addEventListener('mouseleave',function(){ ring.classList.remove('big'); dot.classList.remove('small'); });
+  });
+
+  /* ── SCROLL REVEAL ──────────────────────────────────────── */
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold:0.07, rootMargin:'0px 0px -30px 0px' });
+  document.querySelectorAll('.reveal, .collective-star, .formation-wrap').forEach(function(el){ obs.observe(el); });
+  var skObs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('active'); skObs.unobserve(e.target); } });
+  }, { threshold:0.05 });
+  document.querySelectorAll('.streak-group').forEach(function(el){ skObs.observe(el); });
+
+  /* ── COUNTDOWN ──────────────────────────────────────────── */
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function nextSat1230(){
+    var now=new Date(), d=new Date(now);
+    var daysUntil=(6-d.getDay()+7)%7;
+    if(daysUntil===0){ var t=new Date(d); t.setHours(12,30,0,0); if(now>=t) daysUntil=7; }
+    d.setDate(d.getDate()+daysUntil); d.setHours(12,30,0,0); return d;
+  }
+  function tick(){
+    var target=window._kickoff ? new Date(window._kickoff) : null;
+    if(!target || target.getTime()<=Date.now()) target=nextSat1230();
+    var diff=Math.max(0,target.getTime()-Date.now());
+    var dd=$('cd-d'),dh=$('cd-h'),dm=$('cd-m'),ds=$('cd-s');
+    if(dd) dd.textContent=pad(Math.floor(diff/86400000));
+    if(dh) dh.textContent=pad(Math.floor((diff%86400000)/3600000));
+    if(dm) dm.textContent=pad(Math.floor((diff%3600000)/60000));
+    if(ds) ds.textContent=pad(Math.floor((diff%60000)/1000));
+  }
+  tick(); setInterval(tick,1000);
+
+  /* ── CONTACT ────────────────────────────────────────────── */
+  var cEl=$('contact-links');
+  if(cEl){
+    [{label:'Email Us',sub:CLUB.email,href:'mailto:'+CLUB.email},{label:'Instagram',sub:CLUB.handle,href:CLUB.instagram},{label:'YouTube',sub:'@confluencefc',href:CLUB.youtube}]
+    .forEach(function(l){
+      var a=document.createElement('a');
+      a.className='contact-link reveal'; a.href=l.href; a.target='_blank'; a.rel='noopener';
+      a.innerHTML='<span class="cl-label">'+l.label+'<span class="cl-sub">'+l.sub+'</span></span><span class="cl-arrow">&#8599;</span>';
+      cEl.appendChild(a); obs.observe(a);
+    });
+  }
+
+  /* ── FOOTER ─────────────────────────────────────────────── */
+  var fc=$('footer-copy'); if(fc) fc.textContent='© '+CLUB.founded+' '+CLUB.name;
+  var fh=$('footer-handle'); if(fh) fh.textContent=CLUB.handle;
+
+})();
+
+/* ── ADMIN CMS ───────────────────────────────────────────── */
+(function() {
+  'use strict';
+
+  function ready(fn){ if(window._CFC) fn(); else setTimeout(function(){ ready(fn); },40); }
+
+  ready(function() {
+    var SB = window._CFC.SB, D = window._CFC.D, R = window._CFC.R, CM = window._CFC.CM;
+    var $ = function(id){ return document.getElementById(id); };
+
+    /* ── AUTH ─────────────────────────────────────────────── */
+    SB.auth.onAuthStateChange(function(ev,session){
+      if(session){
+        $('adm-bar').classList.add('show');
+        $('admin-login-link').style.display='none';
+        if(ev==='SIGNED_IN') status('Logged in as '+session.user.email,true);
+      } else {
+        $('adm-bar').classList.remove('show');
+        $('admin-login-link').style.display='';
+        closePanel();
+      }
+    });
+
+    /* ── LOGIN MODAL ──────────────────────────────────────── */
+    var ov=$('adm-overlay'), errEl=$('adm-err'), loginBtn=$('adm-login-btn');
+    $('admin-login-link').addEventListener('click', function(){ ov.classList.add('open'); });
+    $('adm-close').addEventListener('click',        function(){ ov.classList.remove('open'); errEl.classList.remove('show'); });
+    ov.addEventListener('click', function(e){ if(e.target===ov){ ov.classList.remove('open'); errEl.classList.remove('show'); } });
+    $('adm-password').addEventListener('keydown', function(e){ if(e.key==='Enter') loginBtn.click(); });
+
+    loginBtn.addEventListener('click', async function(){
+      var email=$('adm-email').value.trim(), pass=$('adm-password').value;
+      loginBtn.disabled=true; loginBtn.textContent='Signing in…';
+      try {
+        var r = await SB.auth.signInWithPassword({email:email,password:pass});
+        if(r.error) throw r.error;
+        ov.classList.remove('open');
+      } catch(e){
+        errEl.textContent=e.message||'Invalid credentials.'; errEl.classList.add('show');
+      } finally { loginBtn.disabled=false; loginBtn.textContent='Sign In'; }
+    });
+
+    $('adm-logout').addEventListener('click', function(){ SB.auth.signOut(); });
+
+    /* ── PANELS ───────────────────────────────────────────── */
+    var activeKey=null;
+    var panels={ fixture:$('adm-panel-fixture'), results:$('adm-panel-results'), formation:$('adm-panel-formation') };
+
+    function closePanel(){
+      Object.keys(panels).forEach(function(k){
+        var p=panels[k]; p.classList.remove('open');
+        setTimeout(function(){ if(!p.classList.contains('open')) p.style.display='none'; },340);
+      });
+      document.querySelectorAll('.adm-btn').forEach(function(b){ b.classList.remove('active'); });
+      if(activeKey==='formation') exitFormation();
+      activeKey=null;
+    }
+
+    window._cfcPanel = function(key){
+      if(_editMode) exitEditMode(false);
+      if(activeKey===key){ closePanel(); return; }
+      closePanel(); activeKey=key;
+      var panel=panels[key];
+      panel.style.display='block';
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ panel.classList.add('open'); }); });
+      $('adm-btn-'+key).classList.add('active');
+      if(key==='fixture')   fillFixture();
+      if(key==='results')   fillResults();
+      if(key==='formation') enterFormation();
+    };
+
+    /* ── STATUS TOAST ─────────────────────────────────────── */
+    var _toastTimer=null;
+    function status(msg,ok,err){
+      var el=$('adm-status'); el.textContent=ok?'Saved ✓':msg; el.className=ok?'ok':'';
+      var t=$('adm-toast');
+      t.textContent=msg; t.className='show '+(ok?'ok':err?'err':'');
+      clearTimeout(_toastTimer);
+      _toastTimer=setTimeout(function(){
+        t.classList.remove('show');
+        if(ok){ el.textContent=''; el.className=''; }
+      }, ok?2200:4000);
+    }
+
+    function handleErr(e){
+      console.error('[CFC Admin]',e);
+      var msg=e&&e.message?e.message:'Unknown error';
+      if(msg.toLowerCase().includes('jwt')||msg.toLowerCase().includes('auth')||msg.toLowerCase().includes('not authenticated')){
+        msg='Not authenticated — please log out and log back in.';
+      } else if(msg.toLowerCase().includes('permission')||msg.toLowerCase().includes('policy')){
+        msg='Permission denied — check Supabase RLS policies are set up correctly.';
+      } else if(msg.toLowerCase().includes('relation')||msg.toLowerCase().includes('does not exist')){
+        msg='Table not found — make sure you ran the SQL setup script in Supabase.';
+      }
+      status(msg,false,true);
+    }
+
+    /* ── FIXTURE PANEL ────────────────────────────────────── */
+    function fillFixture(){
+      var f=D.fixture||{};
+      $('fx-opp').value=f.opponent||''; $('fx-venue').value=f.venue||'';
+      $('fx-ha').value=f.home_away||'H'; $('fx-comp').value=f.competition||'';
+      if(f.kickoff){
+        var ko=new Date(f.kickoff);
+        $('fx-ko').value=new Date(ko-ko.getTimezoneOffset()*60000).toISOString().slice(0,16);
+      }
+    }
+    $('fx-save').addEventListener('click', async function(){
+      status('Saving…');
+      var p={ opponent:$('fx-opp').value.trim(), kickoff:new Date($('fx-ko').value).toISOString(), venue:$('fx-venue').value.trim(), home_away:$('fx-ha').value, competition:$('fx-comp').value.trim() };
+      try {
+        if(D.fixture&&D.fixture.id){
+          var {error:fxe}=await SB.from('fixtures').update(p).eq('id',D.fixture.id);
+          if(fxe){handleErr(fxe);return;} Object.assign(D.fixture,p);
+        } else {
+          var {data:fxi,error:fxe2}=await SB.from('fixtures').insert(p).select().single();
+          if(fxe2){handleErr(fxe2);return;} D.fixture=fxi;
+        }
+        R.renderFixture(D.fixture); status('Saved ✓',true);
+      } catch(e){ handleErr(e); }
+    });
+
+    /* ── RESULTS PANEL ────────────────────────────────────── */
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+    function fillResults(){
+      var list=$('res-list'); list.innerHTML='';
+      D.results.forEach(function(r,i){ list.appendChild(makeRow(r,i)); });
+    }
+
+    function makeRow(r,i){
+      var row=document.createElement('div'); row.className='res-edit-row';
+      row.innerHTML='<input class="adm-input" style="flex:2;min-width:90px" placeholder="Opponent" value="'+esc(r.opponent)+'">'
+        +'<input class="adm-input" style="width:50px;text-align:center" type="number" min="0" placeholder="F" value="'+(r.goals_for||0)+'">'
+        +'<span style="font-family:\'Barlow Condensed\';padding:0 .15rem">–</span>'
+        +'<input class="adm-input" style="width:50px;text-align:center" type="number" min="0" placeholder="A" value="'+(r.goals_against||0)+'">'
+        +'<input class="adm-input" style="width:115px" type="date" value="'+(r.match_date||'').slice(0,10)+'">'
+        +'<select class="adm-select" style="width:56px"><option value="H"'+(r.home_away==='H'?' selected':'')+'>H</option><option value="A"'+(r.home_away==='A'?' selected':'')+'>A</option></select>'
+        +'<button class="adm-save" style="padding:.38rem .75rem;margin:0" data-a="s">Save</button>'
+        +(r.id?'<button class="res-del" data-a="d">✕</button>':'');
+      var inp=row.querySelectorAll('input,select');
+      row.querySelector('[data-a="s"]').addEventListener('click',async function(){
+        var p={opponent:inp[0].value.trim(),goals_for:parseInt(inp[1].value)||0,goals_against:parseInt(inp[2].value)||0,match_date:inp[3].value,home_away:inp[4].value};
+        status('Saving…');
+        try {
+          if(r.id){
+            var {error:re}=await SB.from('results').update(p).eq('id',r.id);
+            if(re){handleErr(re);return;} Object.assign(r,p);
+          } else {
+            var {data:ri,error:re2}=await SB.from('results').insert(p).select().single();
+            if(re2){handleErr(re2);return;} D.results[i]=ri;
+          }
+          R.renderResults(D.results); status('Saved ✓',true);
+        } catch(e){ handleErr(e); }
+      });
+      var del=row.querySelector('[data-a="d"]');
+      if(del) del.addEventListener('click',async function(){
+        if(!confirm('Delete this result?')) return; status('Deleting…');
+        try {
+          var {error:de}=await SB.from('results').delete().eq('id',r.id);
+          if(de){handleErr(de);return;}
+          D.results.splice(i,1); R.renderResults(D.results); fillResults(); status('Deleted ✓',true);
+        } catch(e){ handleErr(e); }
+      });
+      return row;
+    }
+
+    $('res-add').addEventListener('click',function(){
+      D.results.unshift({opponent:'',goals_for:0,goals_against:0,match_date:'',home_away:'H'});
+      fillResults(); $('res-list').querySelector('input').focus();
+    });
+
+    /* ── RESULT INLINE EDIT (from page, in edit mode) ──────── */
+    var _dsResultsEl = $('ds-results');
+    if(_dsResultsEl) _dsResultsEl.addEventListener('click', function(e){
+      if(!_editMode) return;
+      var row = e.target.closest('.result-row');
+      if(!row || row.querySelector('.res-inline-form')) return;
+      var idx = parseInt(row.dataset.resIdx);
+      if(isNaN(idx)) return;
+      var r = D.results[idx]; if(!r) return;
+      var origHTML = row.innerHTML;
+      row.innerHTML = '<div class="res-inline-form">'
+        +'<input class="adm-input" style="flex:2;min-width:90px" placeholder="Opponent" value="'+esc(r.opponent)+'">'
+        +'<div class="res-wdl"><button data-v="w">W</button><button data-v="d">D</button><button data-v="l">L</button></div>'
+        +'<input class="adm-input" style="width:38px;text-align:center" type="number" min="0" value="'+(r.goals_for||0)+'">'
+        +'<span class="res-dash">–</span>'
+        +'<input class="adm-input" style="width:38px;text-align:center" type="number" min="0" value="'+(r.goals_against||0)+'">'
+        +'<select class="adm-select"><option value="H"'+(r.home_away==='H'?' selected':'')+'>H</option><option value="A"'+(r.home_away==='A'?' selected':'')+'>A</option></select>'
+        +'<button class="res-inline-save">Save</button>'
+        +'<button class="res-inline-cancel">✕</button>'
+        +'</div>';
+      // W/D/L quick-set
+      var gfInp = row.querySelectorAll('input[type="number"]')[0];
+      var gaInp = row.querySelectorAll('input[type="number"]')[1];
+      var curCls = r.goals_for > r.goals_against ? 'w' : r.goals_for === r.goals_against ? 'd' : 'l';
+      var wdlBtns = row.querySelectorAll('.res-wdl button');
+      wdlBtns.forEach(function(b){
+        if(b.dataset.v === curCls) b.classList.add('active-'+curCls);
+        b.addEventListener('click', function(){
+          wdlBtns.forEach(function(x){ x.className=''; });
+          b.classList.add('active-'+b.dataset.v);
+          if(b.dataset.v==='w'){ gfInp.value=1; gaInp.value=0; }
+          else if(b.dataset.v==='d'){ gfInp.value=0; gaInp.value=0; }
+          else { gfInp.value=0; gaInp.value=1; }
+        });
+      });
+      var inp = row.querySelectorAll('input,select');
+      row.querySelector('.res-inline-save').addEventListener('click', async function(){
+        var p = {opponent:inp[0].value.trim(), goals_for:parseInt(gfInp.value)||0, goals_against:parseInt(gaInp.value)||0, home_away:inp[3].value};
+        status('Saving…');
+        try {
+          if(r.id){
+            var {error:rie}=await SB.from('results').update(p).eq('id',r.id);
+            if(rie){handleErr(rie);return;} Object.assign(r,p);
+          } else {
+            var {data:ri2,error:rie2}=await SB.from('results').insert(p).select().single();
+            if(rie2){handleErr(rie2);return;} D.results[idx]=ri2;
+          }
+          R.renderResults(D.results); fillResults(); status('Saved ✓',true);
+        } catch(ex){ handleErr(ex); }
+      });
+      row.querySelector('.res-inline-cancel').addEventListener('click', function(){
+        R.renderResults(D.results);
+      });
+    });
+
+    /* ── FORMATION MODE ───────────────────────────────────── */
+    function renderFormationIn(squad, pitchEl){
+      if(!pitchEl) return;
+      pitchEl.querySelectorAll('.player-node').forEach(function(n){ n.remove(); });
+      squad.filter(function(p){ return p.in_xi; }).forEach(function(p){
+        var node=document.createElement('div');
+        node.className='player-node'; node.dataset.pid=p.id;
+        node.style.cssText='--px:'+p.pitch_x+'%;--py:'+p.pitch_y+'%;';
+        node.innerHTML='<div class="p-circle'+(p.position==='GK'?' gk':'')+'">'+p.number+'</div>'
+          +'<span class="p-name">'+p.name+'</span><span class="p-pos">'+p.position+'</span>';
+        pitchEl.appendChild(node);
+      });
+    }
+
+    function enterFormation(){
+      document.body.classList.add('adm-formation');
+      renderFormationIn(D.squad, $('adm-pitch'));
+      buildChips();
+      bindDrag();
+    }
+    function exitFormation(){
+      document.body.classList.remove('adm-formation');
+      unbindDrag();
+      var ap=$('adm-pitch'); if(ap) ap.querySelectorAll('.player-node').forEach(function(n){ n.remove(); });
+    }
+
+    function buildChips(){
+      var g=$('roster-grid'); g.innerHTML='';
+      D.squad.forEach(function(p){
+        var c=document.createElement('div');
+        c.className='roster-chip'+(p.in_xi?' xi':'');
+        c.innerHTML='<span class="chip-num">'+(p.number||'?')+'</span><span>'+p.name+'</span><span class="chip-pos">'+p.position+'</span>';
+        c.addEventListener('click',function(){
+          var n=D.squad.filter(function(x){return x.in_xi;}).length;
+          if(!p.in_xi&&n>=11){alert('Already 11 in Starting XI — remove one first.');return;}
+          p.in_xi=!p.in_xi; c.classList.toggle('xi',p.in_xi);
+          renderFormationIn(D.squad, $('adm-pitch'));
+          R.renderFormation(D.squad);
+          R.renderBench(D.squad);
+          bindDrag();
+        });
+        g.appendChild(c);
+      });
+    }
+
+    function bindDrag(){
+      document.querySelectorAll('.player-node').forEach(function(n){
+        n.removeEventListener('mousedown',onDrag); n.addEventListener('mousedown',onDrag);
+      });
+    }
+    function unbindDrag(){
+      document.querySelectorAll('.player-node').forEach(function(n){ n.removeEventListener('mousedown',onDrag); });
+    }
+
+    function onDrag(e){
+      e.preventDefault();
+      var node=this, pitch=node.closest('.pitch'), pr=pitch.getBoundingClientRect();
+      var pid=node.dataset.pid;
+      node.classList.add('dragging');
+      function mv(ev){
+        var x=Math.min(97,Math.max(3,(ev.clientX-pr.left)/pr.width*100));
+        var y=Math.min(97,Math.max(3,(ev.clientY-pr.top)/pr.height*100));
+        node.style.setProperty('--px',x+'%'); node.style.setProperty('--py',y+'%');
+        node.dataset.nx=x; node.dataset.ny=y;
+        // sync position to the other pitch (panel ↔ page)
+        document.querySelectorAll('.pitch').forEach(function(otherPitch){
+          if(otherPitch===pitch) return;
+          var twin=otherPitch.querySelector('[data-pid="'+pid+'"]');
+          if(twin){ twin.style.setProperty('--px',x+'%'); twin.style.setProperty('--py',y+'%'); }
+        });
+      }
+      function up(){
+        node.classList.remove('dragging');
+        var p=D.squad.find(function(x){return String(x.id)===pid;});
+        if(p){p.pitch_x=parseFloat(node.dataset.nx||50);p.pitch_y=parseFloat(node.dataset.ny||50);}
+        document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up);
+      }
+      document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
+    }
+
+    $('formation-save').addEventListener('click',async function(){
+      status('Saving…');
+      try {
+        var sqRes=await Promise.all(D.squad.map(function(p){ return SB.from('squad').update({in_xi:p.in_xi,pitch_x:p.pitch_x,pitch_y:p.pitch_y}).eq('id',p.id); }));
+        var sqErr=sqRes.find(function(r){return r.error;});
+        if(sqErr){handleErr(sqErr.error);return;}
+        status('Formation saved ✓',true);
+      } catch(e){ handleErr(e); }
+    });
+
+    /* ── INLINE EDIT MODE ────────────────────────────────── */
+    var _editMode = false;
+    var _editSnapshot = {}; // backup of original innerHTML per key
+
+    // stamp data-cfc-label on elements so tooltip works
+    CM.forEach(function(m){
+      var el = document.querySelector(m.sel);
+      if(el && !el.dataset.cfcLabel) el.dataset.cfcLabel = m.label;
+    });
+
+    function enterEditMode(){
+      _editMode = true;
+      _editSnapshot = {};
+      CM.forEach(function(m){
+        var el = document.querySelector(m.sel); if(!el) return;
+        _editSnapshot[m.key] = el.innerHTML;
+        el.contentEditable = 'true';
+        el.spellcheck = false;
+      });
+      document.body.classList.add('cfc-edit');
+      $('adm-btn-edit').classList.add('active');
+      closePanel();
+    }
+
+    function exitEditMode(restore){
+      _editMode = false;
+      CM.forEach(function(m){
+        var el = document.querySelector(m.sel); if(!el) return;
+        el.contentEditable = 'false';
+        if(restore && _editSnapshot[m.key] !== undefined) el.innerHTML = _editSnapshot[m.key];
+      });
+      document.body.classList.remove('cfc-edit');
+      $('adm-btn-edit').classList.remove('active');
+    }
+
+    window._cfcToggleEdit = function(){
+      if(_editMode){ exitEditMode(false); }
+      else { enterEditMode(); }
+    };
+
+    $('adm-edit-cancel-btn').addEventListener('click', function(){
+      exitEditMode(true); // restore originals
+    });
+
+    $('adm-edit-save-btn').addEventListener('click', async function(){
+      status('Saving…');
+      var saves = [];
+      CM.forEach(function(m){
+        var el = document.querySelector(m.sel); if(!el) return;
+        var val = el.innerHTML.trim();
+        D.content[m.key] = val;
+        saves.push(SB.from('site_content').upsert({key:m.key, value:val, updated_at:new Date().toISOString()}));
+      });
+      try {
+        var ctRes = await Promise.all(saves);
+        var ctErr = ctRes.find(function(r){ return r.error; });
+        if(ctErr){ handleErr(ctErr.error); return; }
+        status('All changes saved ✓', true);
+        exitEditMode(false);
+      } catch(e){ handleErr(e); }
+    });
+  });
+})();
+
+/* ── ASSET EDITOR ───────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  // Assets that can be dragged/resized. selector → CSS selector, label → display name
+  var ASSETS = [
+    { id:'page-accents',   sel:'.page-accents',       label:'Page Accents'  },
+    { id:'hero-type',      sel:'.hero-type',           label:'Hero Text'     },
+    { id:'hero-badge',     sel:'.hero-badge',          label:'FC Badge'      },
+    { id:'hero-ctas',      sel:'.hero-ctas',           label:'Hero Buttons'  },
+    { id:'hero-vision',    sel:'.hero-vision',         label:'Hero Tagline'  },
+    { id:'hero-match-b',   sel:'.hero-match-badge',    label:'Match Badge'   },
+    { id:'hero-pitch-g',   sel:'.hero-pitch-ghost',    label:'Pitch Ghost'   },
+    { id:'hero-scroll-c',  sel:'.hero-scroll-cue',     label:'Scroll Cue'   },
+    { id:'amaan-player',   sel:'.collective-player',   label:'Amaan Photo'   },
+    { id:'coll-star',      sel:'.collective-star',     label:'Starburst'     },
+    { id:'squad-stars',    sel:'.squad-bg-stars',      label:'Squad Stars'   },
+    { id:'contact-excl',   sel:'.contact-excl',        label:'Exclamation'   },
+  ];
+
+  var editOn   = false;
+  var drag     = null;    // { el, startX, startY, origLeft, origTop }
+  var resizing = null;    // { el, startX, startY, origW, origH }
+  var hoveredEl = null;   // element under cursor in edit mode (for resize handle)
+
+  // Version bump clears stale localStorage positions from old layout sessions
+  var STORE_VER = '3';
+  if (localStorage.getItem('cfc_pos_v') !== STORE_VER) {
+    localStorage.removeItem('cfc_positions');
+    localStorage.setItem('cfc_pos_v', STORE_VER);
+  }
+  var store = JSON.parse(localStorage.getItem('cfc_positions') || '{}');
+
+  var toggleBtn = document.getElementById('ed-toggle');
+  var tools     = document.getElementById('ed-tools');
+  var listEl    = document.getElementById('ed-asset-list');
+  var copyBtn   = document.getElementById('ed-copy');
+  var outputEl  = document.getElementById('ed-output');
+  var rh        = document.getElementById('ed-rh'); // resize handle
+
+  /* Build asset list in panel */
+  ASSETS.forEach(function(a) {
+    var row = document.createElement('div');
+    row.className = 'ed-asset-item';
+    row.id = 'ed-row-' + a.id;
+    row.innerHTML = '<span class="ed-asset-dot"></span>' + a.label;
+    listEl.appendChild(row);
+  });
+
+  /* Apply saved positions + sizes */
+  function applySaved() {
+    ASSETS.forEach(function(a) {
+      var el = document.querySelector(a.sel); if(!el) return;
+      var s = store[a.id]; if(!s) return;
+      if (s.top)    el.style.top    = s.top;
+      if (s.left)   el.style.left   = s.left;
+      if (s.width)  el.style.width  = s.width;
+      if (s.height) el.style.height = s.height;
+    });
+  }
+  applySaved();
+
+  /* Place resize handle at bottom-right corner of el */
+  function placeRh(el) {
+    var r = el.getBoundingClientRect();
+    rh.style.left    = (r.right  - 10) + 'px';
+    rh.style.top     = (r.bottom - 10) + 'px';
+    rh.style.display = 'block';
+  }
+
+  /* Toggle edit mode */
+  toggleBtn.addEventListener('click', function() {
+    editOn = !editOn;
+    document.body.classList.toggle('edit-mode', editOn);
+    toggleBtn.classList.toggle('on', editOn);
+    toggleBtn.textContent = editOn ? '✕ Done' : '✎ Edit Assets';
+    tools.classList.toggle('show', editOn);
+    outputEl.classList.remove('show');
+    if (!editOn) { rh.style.display = 'none'; hoveredEl = null; }
+
+    ASSETS.forEach(function(a) {
+      var el = document.querySelector(a.sel); if(!el) return;
+      var row = document.getElementById('ed-row-' + a.id);
+      if (editOn) {
+        el.setAttribute('data-editable', '');
+        el.setAttribute('data-label', a.label);
+        el.dataset.assetId = a.id;
+        el.style.pointerEvents = 'auto';
+        if (row) row.classList.add('active');
+      } else {
+        el.removeAttribute('data-editable');
+        el.removeAttribute('data-label');
+        el.style.pointerEvents = '';
+        if (row) row.classList.remove('active');
+      }
+    });
+  });
+
+  /* ── MOUSE DOWN — start drag or resize ────────────────── */
+  document.addEventListener('mousedown', function(e) {
+    if (!editOn) return;
+
+    /* Resize handle clicked → start resize */
+    if (e.target === rh && hoveredEl) {
+      e.preventDefault(); e.stopPropagation();
+      resizing = {
+        el: hoveredEl,
+        startX: e.clientX, startY: e.clientY,
+        origW: hoveredEl.offsetWidth, origH: hoveredEl.offsetHeight,
+      };
+      rh.classList.add('resizing');
+      return;
+    }
+
+    /* Editable element clicked → start drag */
+    var el = e.target.closest('[data-editable]'); if(!el) return;
+    e.preventDefault();
+
+    var cs = getComputedStyle(el);
+    var oLeft = parseFloat(cs.left); if (isNaN(oLeft)) oLeft = el.offsetLeft;
+    var oTop  = parseFloat(cs.top);  if (isNaN(oTop))  oTop  = el.offsetTop;
+    drag = { el: el, startX: e.clientX, startY: e.clientY, origLeft: oLeft, origTop: oTop };
+    el.classList.add('dragging');
+  });
+
+  /* ── MOUSE MOVE — drag / resize / track hover for handle ── */
+  document.addEventListener('mousemove', function(e) {
+    if (resizing) {
+      var dw = e.clientX - resizing.startX;
+      var dh = e.clientY - resizing.startY;
+      resizing.el.style.width  = Math.max(30, resizing.origW + dw) + 'px';
+      resizing.el.style.height = Math.max(30, resizing.origH + dh) + 'px';
+      placeRh(resizing.el); // keep handle at corner while resizing
+      return;
+    }
+    if (drag) {
+      drag.el.style.left = (drag.origLeft + e.clientX - drag.startX) + 'px';
+      drag.el.style.top  = (drag.origTop  + e.clientY - drag.startY) + 'px';
+      placeRh(drag.el); // keep handle tracking during drag
+      return;
+    }
+    if (!editOn) return;
+    /* Track hovered editable to show resize handle */
+    var el = (e.target === rh) ? hoveredEl : e.target.closest('[data-editable]');
+    if (el) { hoveredEl = el; placeRh(el); }
+    else    { rh.style.display = 'none'; hoveredEl = null; }
+  });
+
+  /* ── MOUSE UP — commit and save ───────────────────────── */
+  document.addEventListener('mouseup', function() {
+    if (resizing) {
+      var id = resizing.el.dataset.assetId;
+      if (id) {
+        store[id] = store[id] || {};
+        store[id].width  = resizing.el.style.width;
+        store[id].height = resizing.el.style.height;
+        localStorage.setItem('cfc_positions', JSON.stringify(store));
+      }
+      rh.classList.remove('resizing');
+      resizing = null;
+    }
+    if (drag) {
+      drag.el.classList.remove('dragging');
+      var id = drag.el.dataset.assetId;
+      if (id) {
+        store[id] = store[id] || {};
+        store[id].top  = drag.el.style.top;
+        store[id].left = drag.el.style.left;
+        localStorage.setItem('cfc_positions', JSON.stringify(store));
+      }
+      drag = null;
+    }
+  });
+
+  /* ── COPY CSS ─────────────────────────────────────────── */
+  copyBtn.addEventListener('click', function() {
+    var lines = ['/* Paste these into the CSS to lock layout */'];
+    ASSETS.forEach(function(a) {
+      var el = document.querySelector(a.sel); if(!el) return;
+      var cs  = getComputedStyle(el);
+      var top    = el.style.top    || cs.top;
+      var left   = el.style.left   || cs.left;
+      var width  = el.style.width  || cs.width;
+      var height = el.style.height || cs.height;
+      lines.push(a.sel + ' { top:' + top + '; left:' + left + '; width:' + width + '; height:' + height + '; }');
+    });
+    var text = lines.join('\n');
+    outputEl.textContent = text;
+    outputEl.classList.add('show');
+    if (navigator.clipboard) navigator.clipboard.writeText(text).catch(function(){});
+  });
+
+  /* ── TOUCH DRAG ───────────────────────────────────────── */
+  document.addEventListener('touchstart', function(e) {
+    if (!editOn) return;
+    var el = e.target.closest('[data-editable]'); if(!el) return;
+    var t = e.touches[0];
+    var cs = getComputedStyle(el);
+    var oLeft = parseFloat(cs.left); if (isNaN(oLeft)) oLeft = el.offsetLeft;
+    var oTop  = parseFloat(cs.top);  if (isNaN(oTop))  oTop  = el.offsetTop;
+    drag = { el: el, startX: t.clientX, startY: t.clientY, origLeft: oLeft, origTop: oTop };
+    el.classList.add('dragging');
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!drag) return;
+    var t = e.touches[0];
+    drag.el.style.left = (drag.origLeft + t.clientX - drag.startX) + 'px';
+    drag.el.style.top  = (drag.origTop  + t.clientY - drag.startY) + 'px';
+  }, { passive: true });
+
+  document.addEventListener('touchend', function() {
+    if (!drag) return;
+    drag.el.classList.remove('dragging');
+    var id = drag.el.dataset.assetId;
+    if (id) {
+      store[id] = store[id] || {};
+      store[id].top  = drag.el.style.top;
+      store[id].left = drag.el.style.left;
+      localStorage.setItem('cfc_positions', JSON.stringify(store));
+    }
+    drag = null;
+  });
+
+}());
+</script>
+</body>
+</html>
